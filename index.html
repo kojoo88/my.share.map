@@ -49,7 +49,6 @@
         .map-link:hover { background: #15803d; }
         .waiting { padding: 40px 20px; color: #64748b; }
         .waiting-icon { font-size: 48px; margin-bottom: 15px; }
-        .last-seen { margin-top: 15px; font-size: 13px; color: #9ca3af; }
     </style>
 </head>
 <body>
@@ -76,7 +75,6 @@
                 </div>
             </div>
             <a href="" id="gmapLink" class="map-link" target="_blank">🌍 Google Maps တွင်ကြည့်ရှုရန်</a>
-            <p class="last-seen">အလိုအလျောက်အပ်ဒိတ်လုပ်နေသည်</p>
         </div>
     </div>
 
@@ -90,7 +88,6 @@
             messagingSenderId: "211556349618",
             appId: "1:211556349618:web:bd5b82d1a01202064bbbab"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const locRef = db.ref('locations');
@@ -107,19 +104,12 @@
             if (data && data.latitude && data.longitude) {
                 waitingArea.style.display = 'none';
                 locationArea.style.display = 'block';
-                
                 latEl.textContent = data.latitude.toFixed(7);
                 lonEl.textContent = data.longitude.toFixed(7);
                 updateTimeEl.textContent = data.timestamp || 'မသိရှိ';
-                
-                const mapUrl = `https://www.google.com/maps?q=${data.latitude},${data.longitude}&z=16`;
-                gmapLink.href = mapUrl;
-            } else {
-                waitingArea.style.display = 'block';
-                locationArea.style.display = 'none';
+                gmapLink.href = `https://www.google.com/maps?q=${data.latitude},${data.longitude}&z=16`;
             }
         });
     </script>
 </body>
-    </html>
-    
+</html>
