@@ -3,51 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👥 တည်နေရာများ ကြည့်ရှုရန်</title>
+    <title>👥 တည်နေရာကြည့်ရန်</title>
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-database-compat.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif;}
         body{background:linear-gradient(135deg,#4facfe,#00f2fe);min-height:100vh;padding:20px;}
-        .container{max-width:500px;margin:0 auto;}
-        h1{text-align:center;color:white;margin-bottom:10px;font-size:22px;}
-        .subtitle{text-align:center;color:rgba(255,255,255,.9);margin-bottom:20px;font-size:14px;}
+        .c{max-width:480px;margin:0 auto;}
+        h1{text-align:center;color:white;margin-bottom:15px;font-size:20px;}
         
-        .my-box{background:white;border-radius:16px;padding:20px;margin-bottom:25px;box-shadow:0 4px 12px rgba(0,0,0,.1);}
-        .my-title{font-size:17px;font-weight:bold;color:#1e40af;margin-bottom:12px;}
-        .detect-btn{width:100%;padding:12px;font-size:15px;border:none;border-radius:8px;background:#3b82f6;color:white;cursor:pointer;font-weight:bold;}
-        .detect-btn:disabled{background:#ccc;}
-        .my-coords{margin-top:12px;display:none;}
-        .my-coords.show{display:block;}
-        .coord-row{display:flex;justify-content:space-between;padding:5px 0;font-size:14px;}
-        .label{color:#64748b;}
-        .value{color:#1e40af;font-weight:600;}
-        .map-link{display:block;text-align:center;background:#16a34a;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:bold;margin-top:10px;}
-        
-        .control-area{text-align:center;margin-bottom:15px;}
-        .close-btn{background:#dc2626;color:white;border:none;padding:12px 24px;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;}
-        .close-btn:hover{background:#b91c1c;}
-        .close-notice{color:white;font-size:13px;margin-top:8px;}
+        .my{background:white;border-radius:12px;padding:16px;margin-bottom:20px;}
+        .my h3{color:#1e40af;margin-bottom:10px;font-size:16px;}
+        button{width:100%;padding:11px;font-size:15px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;}
+        .btn-blue{background:#3b82f6;color:white;}
+        .loc-info{margin-top:10px;display:none;}
+        .loc-info.show{display:block;}
+        .row{display:flex;justify-content:space-between;padding:4px 0;font-size:14px;}
+        .map-a{display:block;background:#16a34a;color:white;text-align:center;padding:9px;border-radius:6px;text-decoration:none;margin-top:10px;font-size:14px;}
         
         .count{text-align:center;color:white;margin-bottom:15px;}
-        .user-card{background:white;border-radius:16px;padding:18px;margin-bottom:15px;box-shadow:0 4px 12px rgba(0,0,0,.08);}
-        .user-name{font-size:17px;font-weight:bold;color:#1e40af;margin-bottom:12px;}
-        .locked{background:#fef3c7;border:2px dashed #f59e0b;border-radius:10px;padding:20px;text-align:center;}
-        .locked-icon{font-size:30px;margin-bottom:8px;}
-        .pass-input{width:100%;padding:10px;font-size:15px;border:2px solid #e5e7eb;border-radius:6px;margin:10px 0;}
-        .unlock-btn{background:#3b82f6;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:bold;}
-        .info-row{margin-bottom:6px;}
-        .time{font-size:12px;color:#9ca3af;margin-top:8px;}
-        .empty{text-align:center;padding:40px 20px;color:white;}
+        .card{background:white;border-radius:12px;padding:16px;margin-bottom:12px;}
+        .name{font-weight:bold;color:#1e40af;margin-bottom:10px;font-size:16px;}
+        .lock{background:#fef3c7;border-radius:8px;padding:18px;text-align:center;}
+        .lock span{font-size:28px;}
+        input{width:100%;padding:10px;font-size:15px;border:2px solid #e5e7eb;border-radius:6px;margin:10px 0;}
+        .btn-green{background:#16a34a;color:white;}
+        .info-row{font-size:14px;margin:4px 0;}
+        .t{font-size:12px;color:#9ca3af;margin-top:8px;}
+        .empty{text-align:center;color:white;padding:30px;}
+        .tip{text-align:center;color:white;font-size:13px;margin-top:15px;opacity:0.9;}
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="c">
         <h1>👥 တည်နေရာများ ကြည့်ရှုရန်</h1>
-        <p class="subtitle">နှစ်ဖက်စလုံး ကိုယ့်နေရာနှင့် အခြားသူ့နေရာကို ကြည့်နိုင်ပါသည်</p>
 
-        <!-- 👀 ကိုယ့်နေရာ -->
-        <div class="my-box">
-            <div class="my-title">👁️ ကျွန်ုပ်ဘယ်ရောက်နေလဲ</div>
-            <button id="detectMyBtn" class="detect-btn
-                
+        <!-- ကိုယ့်နေရာ -->
+        <div class="my">
+            <h3>👁️ ကျွန်ုပ်ဘယ်ရောက်နေလဲ</h3>
+            <button id="myBtn" class="btn-blue">🔍 ကျွန်ုပ်၏တည်နေရာကို ရှာပါ</button>
+            <div id="myInfo" class="loc-info">
+                <div class="row"><b>ကျွန်ုပ် လတီ:</b> <span id="mylat">--</span></div>
+                <div class="row"><b>ကျွန်ုပ် လောင်ဂျီ:</b> <span id="mylng">--</span></div>
+                <a id="mymap" href="" target="_blank" class="map-a">🌍 မြေပုံတွင်ကြည့်ရန်</a>
+            </div>
+        </div>
+
+        <div class="count">အခြားသူများ - <span id="total">0</span> ဦး</div>
+        <div id="list"></div>
+        <div id="empty" class="empty">📍 မည်သူမျှမမျှဝေသေးပါ</div>
+        <div class="tip">✅ ကြည့်ပြီးရင် တက်ဘ်ကို ပိတ်လိုက်ပါ — လုံခြုံပါတယ်</div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrto0f0amUQbRpfshWgyvErrurzq0Ksjw",
+            authDomain: "my-location-share-8bf0f.firebaseapp.com",
+            databaseURL: "https://my-location-share-8bf0f-default-rtdb.firebaseio.com",
+            projectId: "my-location-share-8bf0f",
+            storageBucket: "my-location-share-8bf0f.firebasestorage.app",
+            messagingSenderId: "211556349618",
+            appId: "1:211556349618:web:bd5b82d1a01202064bbbab"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const unlocked = {};
+
+        // ကိုယ့်နေရာ
+        document.getElementById('myBtn').addEventListener('click', function(){
+            this.textContent='ရှာနေသည်...';
+            if(!navigator.geolocation){alert('❌ တည်နေရာမထောက်ပံ့ပါ');this.textContent='🔍 ရှာပါ';return;}
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    document.getElementById('mylat').textContent = pos.coords.latitude.toFixed(6);
+                    document.getElementById('mylng').textContent = pos.coords.longitude.toFixed(6);
+                    document.getElementById('mymap').href = `https://google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                    document.getElementById('myInfo').classList.add('show');
+                    this.textContent='✅ တည်နေရာပြပြီး';
+                    this.style.background='#16a34a';
+                },
+                ()=>{alert('❌ ရှာမတွေ့ပါ — VPN ပိတ်၊ အပြင်သို့သွားပါ');this.textContent='🔍 ရှာပါ';}
+            );
+        });
+
+        function hash(p) { let h=0; for(let i=0;i<p.length;i++)h=((h<<5)-h)+p.charCodeAt(i); return Math.abs(h).toString(16); }
+        window.unlock = function(key){
+            const input = document.getElementById('p-'+key).value;
+            db.ref('users/'+key).once('value').then(snap=>{
+                const u = snap.val();
+                if(u.passwordHash === hash(input)){
+                    unlocked[key]=true;
+                    render();
+                }else{alert('❌ စကားဝှက်မှားနေသည်');}
+            });
+        };
+
+        function card(k, v){
+            if(unlocked[k]){
+                return `<div class="card">
+                    <div class="name">🔓 ${v.name}</div>
+                    <div class="info-row"><b>လတီကျူ့ဒ်:</b> ${v.latitude.toFixed(6)}</div>
+                    <div class="info-row"><b>လောင်ဂျီကျူ့ဒ်:</b> ${v.longitude.toFixed(6)}</div>
+                    <a href="https://google.com/maps?q=${v.latitude},${v.longitude}" target="_blank" class="map-a">🌍 မြေပုံတွင်ကြည့်ရန်</a>
+                    <div class="t">⏰ ${v.time}</div>
+                </div>`;
+            }
+            return `<div class="card">
+                <div class="name">🔒 ${v.name}</div>
+                <div class="lock">
+                    <span>🔒</span>
+                    <div style="margin:8px 0;color:#92400e;">စကားဝှက်လိုအပ်သည်</div>
+                    <input type="password" id="p-${k}" placeholder="စကားဝှက်ထည့်ပါ">
+                    <button class="btn-green" onclick="unlock('${k}')">ဖွင့်ကြည့်ရန်</button>
+                </div>
+            </div>`;
+        }
+
+        function render(){
+            db.ref('users').once('value').then(snap=>{
+                const d = snap.val();
+                const list = document.getElementById('list');
+                if(!d){
+                    list.innerHTML='';
+                    document.getElementById('empty').style.display='block';
+                    document.getElementById('total').textContent='0';
+                    return;
+                }
+                document.getElementById('empty').style.display='none';
+                const keys = Object.keys(d);
+                document.getElementById('total').textContent=keys.length;
+                list.innerHTML = keys.map(k=>card(k,d[k])).join('');
+            });
+        }
+        db.ref('users').on('value', render);
+    </script>
+</body>
+</html>
