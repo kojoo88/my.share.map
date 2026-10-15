@@ -3,66 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👥 တည်နေရာကြည့်ရန်</title>
+    <title>👥 တည်နေရာများကြည့်ရှုခြင်း | Premium</title>
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-database-compat.js"></script>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif;}
-        body{background:linear-gradient(135deg,#4facfe,#00f2fe);min-height:100vh;padding:20px;}
-        .c{max-width:480px;margin:0 auto;}
-        h1{text-align:center;color:white;margin-bottom:15px;font-size:20px;}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+        body{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:24px;}
+        .container{max-width:500px;margin:0 auto;}
         
-        .search-box{margin-bottom:15px;}
-        #searchInput{width:100%;padding:12px;font-size:16px;border:none;border-radius:10px;background:white;box-shadow:0 2px 8px rgba(0,0,0,.1);}
+        .header{text-align:center;margin-bottom:28px;}
+        .header-icon{font-size:40px;margin-bottom:8px;}
+        h1{color:white;font-size:26px;font-weight:700;margin-bottom:4px;}
+        .subtitle{color:rgba(255,255,255,0.8);font-size:14px;}
         
-        .my{background:white;border-radius:12px;padding:16px;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,0,0,.1);}
-        .my h3{color:#1e40af;margin-bottom:10px;font-size:16px;}
-        button{width:100%;padding:11px;font-size:15px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;}
-        .btn-blue{background:#3b82f6;color:white;}
-        .loc-info{margin-top:10px;display:none;}
-        .loc-info.show{display:block;}
-        .row{display:flex;justify-content:space-between;padding:4px 0;font-size:14px;}
-        .map-a{display:block;background:#16a34a;color:white;text-align:center;padding:9px;border-radius:6px;text-decoration:none;margin-top:10px;font-size:14px;}
+        .search-wrapper{margin-bottom:24px;position:relative;}
+        .search-icon{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:18px;}
+        #searchInput{width:100%;padding:16px 16px 16px 48px;font-size:16px;border:none;border-radius:16px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);box-shadow:0 4px 20px rgba(0,0,0,0.08);}
+        #searchInput:focus{outline:none;box-shadow:0 6px 24px rgba(0,0,0,0.12);}
         
-        .count{text-align:center;color:white;margin-bottom:15px;}
-        .card{background:white;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);}
-        .name{font-weight:bold;color:#1e40af;margin-bottom:10px;font-size:16px;display:flex;align-items:center;justify-content:space-between;}
-        .time-badge{font-size:11px;background:#e0f2fe;color:#1e40af;padding:2px 8px;border-radius:10px;}
-        .lock{background:#fef3c7;border-radius:8px;padding:18px;text-align:center;}
-        .lock span{font-size:28px;}
-        input{width:100%;padding:10px;font-size:15px;border:2px solid #e5e7eb;border-radius:6px;margin:10px 0;}
-        .btn-green{background:#16a34a;color:white;}
-        .info-row{font-size:14px;margin:4px 0;}
-        .t{font-size:12px;color:#9ca3af;margin-top:8px;}
-        .expire{font-size:11px;color:#f59e0b;margin-top:4px;}
-        .empty{text-align:center;color:white;padding:30px;}
-        .tip{text-align:center;color:white;font-size:13px;margin-top:15px;opacity:0.9;}
+        .my-card{background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-radius:24px;padding:24px;margin-bottom:28px;box-shadow:0 10px 40px rgba(0,0,0,0.1);}
+        .my-title{font-size:16px;font-weight:600;color:#1a1a2e;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+        .primary-btn{width:100%;padding:15px;font-size:15px;font-weight:600;border:none;border-radius:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;cursor:pointer;transition:transform 0.2s;}
+        .primary-btn:disabled{background:#d4d4d8;cursor:not-allowed;}
+        .primary-btn:active{transform:scale(0.98);}
+        .my-coords{margin-top:16px;display:none;}
+        .my-coords.show{display:block;}
+        .coord-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1f1f3;font-size:14px;}
+        .coord-row:last-child{border-bottom:none;}
+        .c-label{color:#71717a;}
+        .c-value{color:#1a1a2e;font-weight:600;font-family:'SF Mono',monospace;}
+        .map-btn{display:block;text-align:center;background:linear-gradient(135deg,#10b981,#059669);color:white;text-decoration:none;padding:12px;border-radius:12px;font-weight:600;font-size:14px;margin-top:14px;}
+        
+        .stats-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+        .count-text{color:white;font-size:15px;}
+        .count-text span{font-weight:700;font-size:18px;}
+        .note-text{color:rgba(255,255,255,0.7);font-size:12px;}
+        
+        .user-card{background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-radius:20px;padding:22px;margin-bottom:16px;box-shadow:0 8px 24px rgba(0,0,0,0.08);transition:transform 0.2s;}
+        .user-card:active{transform:scale(0.99);}
+        .user-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+        .user-name{font-size:17px;font-weight:600;color:#1a1a2e;display:flex;align-items:center;gap:8px;}
+        .time-badge{font-size:11px;background:#ede9fe;color:#5b21b6;padding:4px 10px;border-radius:20px;font-weight:500;}
+        
+        .locked-box{background:#fffbeb;border:2px solid #fef3c7;border-radius:14px;padding:24px;text-align:center;}
+        .lock-icon{font-size:36px;margin-bottom:10px;}
+        .lock-text{color:#92400e;font-size:14px;margin-bottom:14px;}
+        .pass-field{width:100%;padding:12px 14px;font-size:15px;border:2px solid #fef3c7;border-radius:10px;margin-bottom:12px;}
+        .pass-field:focus{outline:none;border-color:#f59e0b;}
+        .unlock-btn{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:10px 24px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;}
+        
+        .info-row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;}
+        .i-label{color:#71717a;}
+        .i-value{color:#1a1a2e;font-weight:500;font-family:'SF Mono',monospace;}
+        .time-info{font-size:12px;color:#a1a1aa;margin-top:10px;padding-top:10px;border-top:1px solid #f1f1f3;}
+        .expire-warning{font-size:12px;color:#d97706;margin-top:6px;}
+        
+        .empty-state{text-align:center;padding:60px 30px;color:white;}
+        .empty-icon{font-size:56px;margin-bottom:16px;opacity:0.6;}
+        .empty-text{font-size:16px;opacity:0.8;}
     </style>
 </head>
 <body>
-    <div class="c">
-        <h1>👥 တည်နေရာများ ကြည့်ရှုရန်</h1>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">👥</div>
+            <h1>တည်နေရာများ ကြည့်ရှုခြင်း</h1>
+            <p class="subtitle">လုံခြုံစွာ ကြည့်ရှုနိုင်ပါသည် • ဒေတာသည် ၁ နာရီသာ သိမ်းဆည်းထားမည်</p>
+        </div>
 
-        <!-- 🔍 ရှာဖွေရေးအကွက် -->
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="🔍 နာမည်ဖြင့်ရှာဖွေရန်...">
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="အမည်ဖြင့်ရှာဖွေရန်...">
         </div>
 
         <!-- ကိုယ့်နေရာ -->
-        <div class="my">
-            <h3>👁️ ကျွန်ုပ်ဘယ်ရောက်နေလဲ</h3>
-            <button id="myBtn" class="btn-blue">🔍 ကျွန်ုပ်၏တည်နေရာကို ရှာပါ</button>
-            <div id="myInfo" class="loc-info">
-                <div class="row"><b>ကျွန်ုပ် လတီ:</b> <span id="mylat">--</span></div>
-                <div class="row"><b>ကျွန်ုပ် လောင်ဂျီ:</b> <span id="mylng">--</span></div>
-                <a id="mymap" href="" target="_blank" class="map-a">🌍 မြေပုံတွင်ကြည့်ရန်</a>
+        <div class="my-card">
+            <div class="my-title">👁️ ကျွန်ုပ်၏တည်နေရာ</div>
+            <button id="myLocBtn" class="primary-btn">🔍 တည်နေရာကို ရှာဖွေရန်</button>
+            <div id="myCoordsBox" class="my-coords">
+                <div class="coord-row"><span class="c-label">လတီကျူ့ဒ်</span><span class="c-value" id="myLat">--</span></div>
+                <div class="coord-row"><span class="c-label">လောင်ဂျီကျူ့ဒ်</span><span class="c-value" id="myLng">--</span></div>
+                <a id="myMapLink" href="" target="_blank" class="map-btn">🌍 မြေပုံပေါ်တွင် ဖွင့်ကြည့်ရန်</a>
             </div>
         </div>
 
-        <div class="count">အခြားသူများ - <span id="total">0</span> ဦး</div>
-        <div id="list"></div>
-        <div id="empty" class="empty">📍 မည်သူမျှမမျှဝေသေးပါ</div>
-        <div class="tip">⏰ ဒေတာအားလုံးသည် ၁ နာရီအကြာတွင် အလိုအလျောက်ဖျက်ပါမည်</div>
+        <div class="stats-bar">
+            <p class="count-text">စုစုပေါင်း - <span id="totalCount">0</span> ဦး</p>
+            <p class="note-text">⏰ ၁ နာရီအကြာတွင် အလိုအလျောက်ဖျက်မည်</p>
+        </div>
+
+        <div id="usersList"></div>
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <div class="empty-icon">📍</div>
+            <p class="empty-text">မည်သူမျှ တည်နေရာမမျှဝေသေးပါ</p>
+        </div>
     </div>
 
     <script>
@@ -78,142 +112,151 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const unlocked = {};
-        const ONE_HOUR = 60 * 60 * 1000; // ၁ နာရီ = ၃၆၀၀ စက္ကန့်
+        const ONE_HOUR = 60 * 60 * 1000;
 
         // ကိုယ့်နေရာ
-        document.getElementById('myBtn').addEventListener('click', function(){
-            this.textContent='ရှာနေသည်...';
-            if(!navigator.geolocation){alert('❌ တည်နေရာမထောက်ပံ့ပါ');this.textContent='🔍 ရှာပါ';return;}
+        const myLocBtn = document.getElementById('myLocBtn');
+        myLocBtn.addEventListener('click', function(){
+            this.textContent = '⏳ ရှာဖွေနေသည်...';
+            if(!navigator.geolocation){
+                alert('❌ တည်နေရာဝန်ဆောင်မှု မရရှိနိုင်ပါ');
+                this.textContent = '🔍 တည်နေရာကို ရှာဖွေရန်';
+                return;
+            }
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
-                    document.getElementById('mylat').textContent = pos.coords.latitude.toFixed(6);
-                    document.getElementById('mylng').textContent = pos.coords.longitude.toFixed(6);
-                    document.getElementById('mymap').href = `https://google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-                    document.getElementById('myInfo').classList.add('show');
-                    this.textContent='✅ တည်နေရာပြပြီး';
-                    this.style.background='#16a34a';
+                    document.getElementById('myLat').textContent = pos.coords.latitude.toFixed(6);
+                    document.getElementById('myLng').textContent = pos.coords.longitude.toFixed(6);
+                    document.getElementById('myMapLink').href = `https://google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                    document.getElementById('myCoordsBox').classList.add('show');
+                    this.textContent = '✅ တည်နေရာပြပြီး';
+                    this.style.background = 'linear-gradient(135deg,#10b981,#059669)';
                 },
-                ()=>{alert('❌ ရှာမတွေ့ပါ — VPN ပိတ်၊ အပြင်သို့သွားပါ');this.textContent='🔍 ရှာပါ';}
+                () => {
+                    alert('❌ တည်နေရာရှာမတွေ့ပါ — VPN ပိတ်ပါ၊ အပြင်သို့သွားပါ');
+                    this.textContent = '🔍 တည်နေရာကို ရှာဖွေရန်';
+                },
+                {enableHighAccuracy:true, timeout:15000}
             );
         });
 
-        function hash(p) { let h=0; for(let i=0;i<p.length;i++)h=((h<<5)-h)+p.charCodeAt(i); return Math.abs(h).toString(16); }
-        window.unlock = function(key){
-            const input = document.getElementById('p-'+key).value;
+        function hashPass(p) { let h=0; for(let i=0;i<p.length;i++)h=((h<<5)-h)+p.charCodeAt(i); return Math.abs(h).toString(16); }
+        window.tryUnlock = function(key){
+            const input = document.getElementById('passInput-'+key).value;
             db.ref('users/'+key).once('value').then(snap=>{
-                const u = snap.val();
-                if(u.passwordHash === hash(input)){
-                    unlocked[key]=true;
-                    render();
-                }else{alert('❌ စကားဝှက်မှားနေသည်');}
+                const user = snap.val();
+                if(user.passwordHash === hashPass(input)){
+                    unlocked[key] = true;
+                    renderList();
+                }else{
+                    alert('❌ စကားဝှက်မှားနေပါသည်');
+                }
             });
         };
 
-        // အချိန်တွက်ချက်ခြင်း
-        function getTimeAgo(timestampStr) {
-            const now = new Date();
-            const then = new Date(timestampStr);
-            const diffMs = now - then;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMins / 60);
-            
-            if(diffMins < 1) return 'အခုလေးတင်';
-            if(diffMins < 60) return `${diffMins} မိနစ်အကြာ`;
-            return `${diffHours} နာရီခန့်အကြာ`;
+        function getTimeAgo(timeStr){
+            const now = Date.now();
+            const then = new Date(timeStr).getTime();
+            const diff = now - then;
+            const mins = Math.floor(diff / 60000);
+            if(mins < 1) return 'အခုလေးတင်';
+            if(mins < 60) return `${mins} မိနစ်အကြာ`;
+            return `${Math.floor(mins/60)} နာရီအကြာ`;
         }
 
-        // သက်တမ်းကုန်ခြင်း ရှိမရှိစစ်ဆေးပြီး ဖျက်ပါ
-        function isExpired(timestampStr) {
-            const then = new Date(timestampStr);
-            return (Date.now() - then.getTime()) > ONE_HOUR;
+        function isExpired(timeStr){
+            return Date.now() - new Date(timeStr).getTime() > ONE_HOUR;
         }
 
-        function card(k, v){
-            const timeAgo = getTimeAgo(v.time);
-            const isExpiredSoon = (Date.now() - new Date(v.time).getTime()) > (ONE_HOUR * 0.75); // ၄၅မိနစ်ကျော်ရင် သတိပေး
+        function willExpireSoon(timeStr){
+            return Date.now() - new Date(timeStr).getTime() > ONE_HOUR * 0.75;
+        }
+
+        function generateCard(key, user){
+            const timeAgo = getTimeAgo(user.time);
+            const expiringSoon = willExpireSoon(user.time);
             
-            if(unlocked[k]){
-                return `<div class="card">
-                    <div class="name">🔓 ${v.name} <span class="time-badge">${timeAgo}</span></div>
-                    <div class="info-row"><b>လတီကျူ့ဒ်:</b> ${v.latitude.toFixed(6)}</div>
-                    <div class="info-row"><b>လောင်ဂျီကျူ့ဒ်:</b> ${v.longitude.toFixed(6)}</div>
-                    <a href="https://google.com/maps?q=${v.latitude},${v.longitude}" target="_blank" class="map-a">🌍 မြေပုံတွင်ကြည့်ရန်</a>
-                    <div class="t">⏰ ပို့ချိန်: ${v.time}</div>
-                    ${isExpiredSoon ? '<div class="expire">⚠️ ၁၅မိနစ်အတွင်း ဖျက်ပါမည်</div>' : ''}
+            if(unlocked[key]){
+                return `
+                <div class="user-card">
+                    <div class="user-header">
+                        <div class="user-name">🔓 ${user.name}</div>
+                        <span class="time-badge">${timeAgo}</span>
+                    </div>
+                    <div class="info-row"><span class="i-label">လတီကျူ့ဒ်</span><span class="i-value">${user.latitude.toFixed(6)}</span></div>
+                    <div class="info-row"><span class="i-label">လောင်ဂျီကျူ့ဒ်</span><span class="i-value">${user.longitude.toFixed(6)}</span></div>
+                    <a href="https://google.com/maps?q=${user.latitude},${user.longitude}" target="_blank" class="map-btn">🌍 မြေပုံပေါ်တွင် ကြည့်ရှုရန်</a>
+                    <div class="time-info">⏰ ပို့ချိန် - ${user.time}</div>
+                    ${expiringSoon ? '<div class="expire-warning">⚠️ ၁၅မိနစ်အတွင်း ဖျက်ပါမည်</div>' : ''}
                 </div>`;
             }
-            return `<div class="card">
-                <div class="name">🔒 ${v.name} <span class="time-badge">${timeAgo}</span></div>
-                <div class="lock">
-                    <span>🔒</span>
-                    <div style="margin:8px 0;color:#92400e;">စကားဝှက်လိုအပ်သည်</div>
-                    <input type="password" id="p-${k}" placeholder="စကားဝှက်ထည့်ပါ">
-                    <button class="btn-green" onclick="unlock('${k}')">ဖွင့်ကြည့်ရန်</button>
-                    ${isExpiredSoon ? '<div class="expire" style="margin-top:8px;">⚠️ ၁၅မိနစ်အတွင်း ဖျက်ပါမည်</div>' : ''}
+            return `
+            <div class="user-card">
+                <div class="user-header">
+                    <div class="user-name">🔒 ${user.name}</div>
+                    <span class="time-badge">${timeAgo}</span>
+                </div>
+                <div class="locked-box">
+                    <div class="lock-icon">🔒</div>
+                    <div class="lock-text">စကားဝှက်ဖြင့်ကာကွယ်ထားသည်</div>
+                    <input type="password" id="passInput-${key}" class="pass-field" placeholder="စကားဝှက်ထည့်ပါ">
+                    <button class="unlock-btn" onclick="tryUnlock('${key}')">ဖွင့်ကြည့်ရန်</button>
+                    ${expiringSoon ? '<div class="expire-warning" style="margin-top:10px;">⚠️ ၁၅မိနစ်အတွင်း ဖျက်ပါမည်</div>' : ''}
                 </div>
             </div>`;
         }
 
-        let allUsers = {};
         let searchQuery = '';
+        document.getElementById('searchInput').addEventListener('input', e=>{
+            searchQuery = e.target.value.trim().toLowerCase();
+            renderList();
+        });
 
-        function render(){
+        function renderList(){
             db.ref('users').once('value').then(snap=>{
                 const data = snap.val() || {};
-                allUsers = data;
                 
-                // သက်တမ်းကုန်သွားတဲ့အရာတွေကို ဖျက်ပါ
-                const deletePromises = [];
+                // သက်တမ်းကုန်သွားတာများ ဖျက်
+                const deletes = [];
                 Object.keys(data).forEach(k=>{
-                    if(isExpired(data[k].time)){
-                        deletePromises.push(db.ref('users/'+k).remove());
-                    }
+                    if(isExpired(data[k].time)) deletes.push(db.ref('users/'+k).remove());
                 });
                 
-                Promise.all(deletePromises).then(()=>{
-                    // ပြန်ဖတ်ပါ
+                Promise.all(deletes).then(()=>{
                     return db.ref('users').once('value');
                 }).then(updatedSnap=>{
-                    const freshData = updatedSnap.val() || {};
-                    const list = document.getElementById('list');
+                    const fresh = updatedSnap.val() || {};
+                    let keys = Object.keys(fresh);
                     
-                    // ရှာဖွေမှု စစ်ထုတ်ပါ
-                    let filteredKeys = Object.keys(freshData);
-                    if(searchQuery.trim()){
-                        filteredKeys = filteredKeys.filter(k=>
-                            freshData[k].name.toLowerCase().includes(searchQuery.toLowerCase())
-                        );
+                    // ရှာဖွေမှု စစ်ထုတ်
+                    if(searchQuery){
+                        keys = keys.filter(k=>fresh[k].name.toLowerCase().includes(searchQuery));
                     }
                     
-                    if(filteredKeys.length === 0){
-                        list.innerHTML='';
-                        document.getElementById('empty').style.display='block';
-                        document.getElementById('total').textContent='0';
+                    // အသစ်ဆုံး အပေါ်က
+                    keys.sort((a,b)=>new Date(fresh[b].time) - new Date(fresh[a].time));
+                    
+                    const listEl = document.getElementById('usersList');
+                    const emptyEl = document.getElementById('emptyState');
+                    const countEl = document.getElementById('totalCount');
+                    
+                    countEl.textContent = keys.length;
+                    
+                    if(keys.length === 0){
+                        listEl.innerHTML = '';
+                        emptyEl.style.display = 'block';
                         return;
                     }
                     
-                    document.getElementById('empty').style.display='none';
-                    document.getElementById('total').textContent=filteredKeys.length;
-                    
-                    // အချိန်အသစ်ဆုံးက အပေါ်ကနေ
-                    filteredKeys.sort((a,b)=>new Date(freshData[b].time) - new Date(freshData[a].time));
-                    
-                    list.innerHTML = filteredKeys.map(k=>card(k,freshData[k])).join('');
+                    emptyEl.style.display = 'none';
+                    listEl.innerHTML = keys.map(k=>generateCard(k, fresh[k])).join('');
                 });
             });
         }
 
-        // ရှာဖွေမှု လုပ်ဆောင်ချက်
-        document.getElementById('searchInput').addEventListener('input', (e)=>{
-            searchQuery = e.target.value;
-            render();
-        });
-
-        db.ref('users').on('value', render);
-        
-        // မိနစ်တိုင်း ပြန်စစ်ပါ
-        setInterval(render, 60000);
+        db.ref('users').on('value', renderList);
+        setInterval(renderList, 60000);
     </script>
 </body>
-    </html>
+                                                                          </html>
     
