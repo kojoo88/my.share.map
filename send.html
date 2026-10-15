@@ -21,7 +21,7 @@
         .status{margin-top:12px;padding:10px;border-radius:6px;display:none;font-size:14px;}
         .ok{background:#d4edda;color:#155724;display:block;}
         .err{background:#f8d7da;color:#721c24;display:block;}
-        .tip{margin-top:15px;text-align:center;font-size:13px;color:#64748b;}
+        .tip{margin-top:15px;text-align:center;font-size:13px;color:#64748b;line-height:1.5;}
     </style>
 </head>
 <body>
@@ -40,7 +40,7 @@
         <button id="sendBtn" class="btn-green">📡 တည်နေရာပို့ပါ</button>
         
         <div id="status" class="status"></div>
-        <div class="tip">✅ ပို့ပြီးရင် တက်ဘ်ကို ကိုယ်တိုင်ပိတ်လိုက်ပါ — လုံခြုံပါတယ်</div>
+        <div class="tip">⏰ ပို့လိုက်တဲ့ဒေတာသည် ၁ နာရီအကြာတွင် အလိုအလျောက်ဖျက်ပါမည်<br>✅ ပို့ပြီးရင် တက်ဘ်ကို ကိုယ်တိုင်ပိတ်လိုက်ပါ</div>
     </div>
 
     <script>
@@ -68,7 +68,7 @@
         function show(m,t){status.textContent=m;status.className='status '+(t==='ok'?'ok':'err');}
 
         detectBtn.addEventListener('click', () => {
-            detectBtn.textContent = 'ရှာနေသည်...';
+            detectBtn.textContent='ရှာနေသည်...';
             if(!navigator.geolocation){show('❌ တည်နေရာမထောက်ပံ့ပါ','err');detectBtn.textContent='🔍 ရှာပါ';return;}
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
@@ -103,9 +103,13 @@
             sendBtn.textContent='ပို့နေသည်...';
             try{
                 await db.ref('users/'+n.replace(/[.#$/[\]]/g,'_')).set({
-                    name:n,passwordHash:hash(p),latitude:lat,longitude:lng,time:new Date().toLocaleString()
+                    name:n,
+                    passwordHash:hash(p),
+                    latitude:lat,
+                    longitude:lng,
+                    time: new Date().toLocaleString()
                 });
-                show('✅ ပို့ပြီးပါပြီ! တက်ဘ်ကိုပိတ်လိုက်ပါ','ok');
+                show('✅ ပို့ပြီးပါပြီ! ၁ နာရီအတွင်း ဖျက်ပါမည်','ok');
                 sendBtn.textContent='✅ ပို့ပြီးပြီ';
                 sendBtn.disabled=true;
             }catch(e){show('❌ '+e.message,'err');sendBtn.textContent='📡 တည်နေရာပို့ပါ';}
