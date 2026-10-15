@@ -12,7 +12,10 @@
         .c{max-width:480px;margin:0 auto;}
         h1{text-align:center;color:white;margin-bottom:15px;font-size:20px;}
         
-        .my{background:white;border-radius:12px;padding:16px;margin-bottom:20px;}
+        .search-box{margin-bottom:15px;}
+        #searchInput{width:100%;padding:12px;font-size:16px;border:none;border-radius:10px;background:white;box-shadow:0 2px 8px rgba(0,0,0,.1);}
+        
+        .my{background:white;border-radius:12px;padding:16px;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,0,0,.1);}
         .my h3{color:#1e40af;margin-bottom:10px;font-size:16px;}
         button{width:100%;padding:11px;font-size:15px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;}
         .btn-blue{background:#3b82f6;color:white;}
@@ -22,14 +25,16 @@
         .map-a{display:block;background:#16a34a;color:white;text-align:center;padding:9px;border-radius:6px;text-decoration:none;margin-top:10px;font-size:14px;}
         
         .count{text-align:center;color:white;margin-bottom:15px;}
-        .card{background:white;border-radius:12px;padding:16px;margin-bottom:12px;}
-        .name{font-weight:bold;color:#1e40af;margin-bottom:10px;font-size:16px;}
+        .card{background:white;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);}
+        .name{font-weight:bold;color:#1e40af;margin-bottom:10px;font-size:16px;display:flex;align-items:center;justify-content:space-between;}
+        .time-badge{font-size:11px;background:#e0f2fe;color:#1e40af;padding:2px 8px;border-radius:10px;}
         .lock{background:#fef3c7;border-radius:8px;padding:18px;text-align:center;}
         .lock span{font-size:28px;}
         input{width:100%;padding:10px;font-size:15px;border:2px solid #e5e7eb;border-radius:6px;margin:10px 0;}
         .btn-green{background:#16a34a;color:white;}
         .info-row{font-size:14px;margin:4px 0;}
         .t{font-size:12px;color:#9ca3af;margin-top:8px;}
+        .expire{font-size:11px;color:#f59e0b;margin-top:4px;}
         .empty{text-align:center;color:white;padding:30px;}
         .tip{text-align:center;color:white;font-size:13px;margin-top:15px;opacity:0.9;}
     </style>
@@ -37,6 +42,11 @@
 <body>
     <div class="c">
         <h1>👥 တည်နေရာများ ကြည့်ရှုရန်</h1>
+
+        <!-- 🔍 ရှာဖွေရေးအကွက် -->
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 နာမည်ဖြင့်ရှာဖွေရန်...">
+        </div>
 
         <!-- ကိုယ့်နေရာ -->
         <div class="my">
@@ -52,7 +62,7 @@
         <div class="count">အခြားသူများ - <span id="total">0</span> ဦး</div>
         <div id="list"></div>
         <div id="empty" class="empty">📍 မည်သူမျှမမျှဝေသေးပါ</div>
-        <div class="tip">✅ ကြည့်ပြီးရင် တက်ဘ်ကို ပိတ်လိုက်ပါ — လုံခြုံပါတယ်</div>
+        <div class="tip">⏰ ဒေတာအားလုံးသည် ၁ နာရီအကြာတွင် အလိုအလျောက်ဖျက်ပါမည်</div>
     </div>
 
     <script>
@@ -68,6 +78,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const unlocked = {};
+        const ONE_HOUR = 60 * 60 * 1000; // ၁ နာရီ = ၃၆၀၀ စက္ကန့်
 
         // ကိုယ့်နေရာ
         document.getElementById('myBtn').addEventListener('click', function(){
@@ -98,44 +109,111 @@
             });
         };
 
+        // အချိန်တွက်ချက်ခြင်း
+        function getTimeAgo(timestampStr) {
+            const now = new Date();
+            const then = new Date(timestampStr);
+            const diffMs = now - then;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            
+            if(diffMins < 1) return 'အခုလေးတင်';
+            if(diffMins < 60) return `${diffMins} မိနစ်အကြာ`;
+            return `${diffHours} နာရီခန့်အကြာ`;
+        }
+
+        // သက်တမ်းကုန်ခြင်း ရှိမရှိစစ်ဆေးပြီး ဖျက်ပါ
+        function isExpired(timestampStr) {
+            const then = new Date(timestampStr);
+            return (Date.now() - then.getTime()) > ONE_HOUR;
+        }
+
         function card(k, v){
+            const timeAgo = getTimeAgo(v.time);
+            const isExpiredSoon = (Date.now() - new Date(v.time).getTime()) > (ONE_HOUR * 0.75); // ၄၅မိနစ်ကျော်ရင် သတိပေး
+            
             if(unlocked[k]){
                 return `<div class="card">
-                    <div class="name">🔓 ${v.name}</div>
+                    <div class="name">🔓 ${v.name} <span class="time-badge">${timeAgo}</span></div>
                     <div class="info-row"><b>လတီကျူ့ဒ်:</b> ${v.latitude.toFixed(6)}</div>
                     <div class="info-row"><b>လောင်ဂျီကျူ့ဒ်:</b> ${v.longitude.toFixed(6)}</div>
                     <a href="https://google.com/maps?q=${v.latitude},${v.longitude}" target="_blank" class="map-a">🌍 မြေပုံတွင်ကြည့်ရန်</a>
-                    <div class="t">⏰ ${v.time}</div>
+                    <div class="t">⏰ ပို့ချိန်: ${v.time}</div>
+                    ${isExpiredSoon ? '<div class="expire">⚠️ ၁၅မိနစ်အတွင်း ဖျက်ပါမည်</div>' : ''}
                 </div>`;
             }
             return `<div class="card">
-                <div class="name">🔒 ${v.name}</div>
+                <div class="name">🔒 ${v.name} <span class="time-badge">${timeAgo}</span></div>
                 <div class="lock">
                     <span>🔒</span>
                     <div style="margin:8px 0;color:#92400e;">စကားဝှက်လိုအပ်သည်</div>
                     <input type="password" id="p-${k}" placeholder="စကားဝှက်ထည့်ပါ">
                     <button class="btn-green" onclick="unlock('${k}')">ဖွင့်ကြည့်ရန်</button>
+                    ${isExpiredSoon ? '<div class="expire" style="margin-top:8px;">⚠️ ၁၅မိနစ်အတွင်း ဖျက်ပါမည်</div>' : ''}
                 </div>
             </div>`;
         }
 
+        let allUsers = {};
+        let searchQuery = '';
+
         function render(){
             db.ref('users').once('value').then(snap=>{
-                const d = snap.val();
-                const list = document.getElementById('list');
-                if(!d){
-                    list.innerHTML='';
-                    document.getElementById('empty').style.display='block';
-                    document.getElementById('total').textContent='0';
-                    return;
-                }
-                document.getElementById('empty').style.display='none';
-                const keys = Object.keys(d);
-                document.getElementById('total').textContent=keys.length;
-                list.innerHTML = keys.map(k=>card(k,d[k])).join('');
+                const data = snap.val() || {};
+                allUsers = data;
+                
+                // သက်တမ်းကုန်သွားတဲ့အရာတွေကို ဖျက်ပါ
+                const deletePromises = [];
+                Object.keys(data).forEach(k=>{
+                    if(isExpired(data[k].time)){
+                        deletePromises.push(db.ref('users/'+k).remove());
+                    }
+                });
+                
+                Promise.all(deletePromises).then(()=>{
+                    // ပြန်ဖတ်ပါ
+                    return db.ref('users').once('value');
+                }).then(updatedSnap=>{
+                    const freshData = updatedSnap.val() || {};
+                    const list = document.getElementById('list');
+                    
+                    // ရှာဖွေမှု စစ်ထုတ်ပါ
+                    let filteredKeys = Object.keys(freshData);
+                    if(searchQuery.trim()){
+                        filteredKeys = filteredKeys.filter(k=>
+                            freshData[k].name.toLowerCase().includes(searchQuery.toLowerCase())
+                        );
+                    }
+                    
+                    if(filteredKeys.length === 0){
+                        list.innerHTML='';
+                        document.getElementById('empty').style.display='block';
+                        document.getElementById('total').textContent='0';
+                        return;
+                    }
+                    
+                    document.getElementById('empty').style.display='none';
+                    document.getElementById('total').textContent=filteredKeys.length;
+                    
+                    // အချိန်အသစ်ဆုံးက အပေါ်ကနေ
+                    filteredKeys.sort((a,b)=>new Date(freshData[b].time) - new Date(freshData[a].time));
+                    
+                    list.innerHTML = filteredKeys.map(k=>card(k,freshData[k])).join('');
+                });
             });
         }
+
+        // ရှာဖွေမှု လုပ်ဆောင်ချက်
+        document.getElementById('searchInput').addEventListener('input', (e)=>{
+            searchQuery = e.target.value;
+            render();
+        });
+
         db.ref('users').on('value', render);
+        
+        // မိနစ်တိုင်း ပြန်စစ်ပါ
+        setInterval(render, 60000);
     </script>
 </body>
-</html>
+    </html>
+    
