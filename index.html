@@ -1,118 +1,178 @@
 <!DOCTYPE html>
 <html lang="my">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ကျွန်ုပ်နေရာ မျှဝေရန်</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; font-family: Arial, sans-serif; }
-    #map { width: 100%; height: calc(100vh - 120px); }
-    .top-hint {
-      position: fixed; top: 0; left: 0; right: 0;
-      background: #e3f2fd; padding: 12px; text-align: center;
-      font-size: 15px; color: #0d47a1; z-index: 1000;
-      border-bottom: 1px solid #90caf9;
-    }
-    .bottom-bar {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: #ffffff; padding: 15px; box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
-      z-index: 1000;
-    }
-    .action-btn {
-      width: 100%; padding: 14px; font-size: 16px; font-weight: bold;
-      border: none; border-radius: 8px; cursor: pointer; transition: 0.2s;
-    }
-    .btn-inactive { background: #e0e0e0; color: #999; cursor: default; }
-    .btn-ready { background: #2196f3; color: white; }
-    .btn-copied { background: #4caf50; color: white; }
-    .link-box {
-      margin-top: 10px; padding: 10px; background: #f5f5f5;
-      border-radius: 4px; font-size: 12px; word-break: break-all; display: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📍 ကျွန်တော့်တည်နေရာ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        h1 {
+            color: #1e40af;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .btn:hover { background: #1d4ed8; }
+        .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        .result {
+            margin-top: 25px;
+            display: none;
+        }
+        .result.show { display: block; }
+        .coords {
+            background: #eff6ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #1e3a8a;
+        }
+        .map-link {
+            display: block;
+            background: #10b981;
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .map-link:hover { background: #059669; }
+        .copy-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            margin-top: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+        }
+        .loading { display: none; color: #2563eb; margin-top: 15px; }
+        .error { color: #dc2626; margin-top: 15px; display: none; }
+    </style>
 </head>
 <body>
-  <div class="top-hint" id="topHint">👆 မြေပုံပေါ်မှာ သင့်နေရာကို တစ်ချက်နှိပ်ပါ</div>
-  <div id="map"></div>
-  <div class="bottom-bar">
-    <button class="action-btn btn-inactive" id="actionBtn" disabled>ဦးစွာ နေရာကို နှိပ်ပါ</button>
-    <div class="link-box" id="linkBox"></div>
-  </div>
+    <div class="card">
+        <h1>📍 တည်နေရာမျှဝေခြင်း</h1>
+        <p>အောက်ကခလုတ်ကိုနှိပ်ပြီး သင့်တည်နေရာကို ရယူပါ</p>
+        
+        <button class="btn" id="getLocBtn">📌 ကျွန်တော့်တည်နေရာကို ရယူမည်</button>
+        
+        <div class="loading" id="loading">⏳ တည်နေရာရှာဖွေနေသည်... ကျေးဇူးပြုပြီး ခွင့်ပြုပါ</div>
+        <div class="error" id="error">❌ တည်နေရာရှာမရပါ။ ကျေးဇူးပြုပြီး တည်နေရာဝန်ဆောင်မှုကို ဖွင့်ပါ။</div>
+        
+        <div class="result" id="result">
+            <div class="coords">
+                <strong>လတီကျူ့ဒ် (Latitude):</strong><br>
+                <span id="lat">--</span><br><br>
+                <strong>လောင်ဂျီကျူ့ဒ် (Longitude):</strong><br>
+                <span id="lon">--</span>
+            </div>
+            <a href="" id="mapLink" class="map-link" target="_blank">🌍 မြေပုံပေါ်ကြည့်ရန် / Share Map</a>
+            <button class="copy-btn" id="copyBtn">📋 မြေပုံလင့်ကို ကူးယူမည်</button>
+        </div>
+    </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    // မြန်မာနိုင်ငံ အလယ်မှာ အစပြုမယ်
-    var map = L.map('map').setView([19.7406, 96.2195], 6);
-    var myMarker = null;
-    var shareUrl = '';
-    var actionBtn = document.getElementById('actionBtn');
-    var topHint = document.getElementById('topHint');
-    var linkBox = document.getElementById('linkBox');
+    <script>
+        const getLocBtn = document.getElementById('getLocBtn');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const result = document.getElementById('result');
+        const latEl = document.getElementById('lat');
+        const lonEl = document.getElementById('lon');
+        const mapLink = document.getElementById('mapLink');
+        const copyBtn = document.getElementById('copyBtn');
+        let fullMapUrl = '';
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+        getLocBtn.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                error.style.display = 'block';
+                error.textContent = '❌ သင့်ဘရောင်ဇာက တည်နေရာရှာဖွေခြင်းကို မထောက်ပံ့ပါ။';
+                return;
+            }
 
-    // မြေပုံပေါ်ကို နှိပ်လိုက်တဲ့အခါ
-    map.on('click', function (e) {
-      if (myMarker) map.removeLayer(myMarker);
+            // UI ပြင်ဆင်ခြင်း
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            result.classList.remove('show');
+            getLocBtn.disabled = true;
 
-      myMarker = L.marker(e.latlng)
-        .addTo(map)
-        .bindPopup(
-          '<strong>သင့်ရွေးချယ်ထားသောနေရာ</strong><br>' +
-          'လတ္တီကျု: ' + e.latlng.lat.toFixed(6) + '<br>' +
-          'လောင်ဂျီကျု: ' + e.latlng.lng.toFixed(6)
-        )
-        .openPopup();
-
-      shareUrl = 'https://www.google.com/maps/search/?api=1&query=' +
-        e.latlng.lat + ',' + e.latlng.lng;
-
-      topHint.innerHTML = '✅ နေရာရွေးချယ်ပြီးပါပြီ';
-      actionBtn.innerHTML = '📋 လင့်ခ်ကူးယူပါ';
-      actionBtn.className = 'action-btn btn-ready';
-      actionBtn.disabled = false;
-      linkBox.style.display = 'none';
-    });
-
-    // ကူးယူခလုတ် နှိပ်တဲ့အခါ
-    actionBtn.addEventListener('click', function () {
-      if (!shareUrl) return;
-
-      // ကူးယူကြိုးပမ်းမယ်
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(shareUrl).then(function () {
-          showCopied();
-        }).catch(function () {
-          showFallbackLink();
+            // တည်နေရာတောင်းခံခြင်း
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    latEl.textContent = lat;
+                    lonEl.textContent = lon;
+                    
+                    // Google Maps လင့်ဖန်တီးခြင်း
+                    fullMapUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+                    mapLink.href = fullMapUrl;
+                    
+                    loading.style.display = 'none';
+                    result.classList.add('show');
+                    getLocBtn.disabled = false;
+                },
+                (err) => {
+                    loading.style.display = 'none';
+                    error.style.display = 'block';
+                    error.textContent = '❌ တည်နေရာရှာမရပါ။ ခွင့်မပြုထားခြင်း သို့မဟုတ် အချက်ပြအားနည်းနေခြင်းကြောင့်ဖြစ်နိုင်ပါတယ်။';
+                    getLocBtn.disabled = false;
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
         });
-      } else {
-        showFallbackLink();
-      }
-    });
 
-    function showCopied() {
-      actionBtn.innerHTML = '✅ ကူးယူပြီးပါပြီ';
-      actionBtn.className = 'action-btn btn-copied';
-      linkBox.style.display = 'block';
-      linkBox.innerHTML = '<strong>လင့်ခ်-</strong><br>' + shareUrl;
-
-      setTimeout(function () {
-        actionBtn.innerHTML = '📋 လင့်ခ်ကူးယူပါ';
-        actionBtn.className = 'action-btn btn-ready';
-      }, 2500);
-    }
-
-    function showFallbackLink() {
-      alert('အောက်ကလင့်ခ်ကို ကူးယူပါ-\\n\\n' + shareUrl);
-      linkBox.style.display = 'block';
-      linkBox.innerHTML = '<strong>လင့်ခ်-</strong><br>' + shareUrl +
-        '<br><small>အပေါ်ကလင့်ခ်ကို ဖိထားပြီး ကူးယူပါ</small>';
-    }
-  </script>
+        // လင့်ကိုကူးယူခြင်း
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(fullMapUrl).then(() => {
+                copyBtn.textContent = '✅ လင့်ကိုကူးပြီးပါပြီ!';
+                setTimeout(() => {
+                    copyBtn.textContent = '📋 မြေပုံလင့်ကို ကူးယူမည်';
+                }, 2500);
+            });
+        });
+    </script>
 </body>
 </html>
