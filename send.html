@@ -1,30 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="my">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send Location</title>
+    <title>📍 ကျွန်ုပ်၏တည်နေရာ မျှဝေရန်</title>
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-database-compat.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body { background: linear-gradient(135deg, #4facfe, #00f2fe); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .card { background: white; border-radius: 16px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
-        h2 { text-align: center; color: #333; margin-bottom: 25px; }
-        button { width: 100%; padding: 14px; font-size: 17px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        #sendBtn { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; }
-        #sendBtn:disabled { background: #ccc; cursor: not-allowed; }
-        .status { margin-top: 20px; padding: 12px; border-radius: 8px; text-align: center; display: none; }
-        .success { background: #d4edda; color: #155724; display:block !important; }
-        .error { background: #f8d7da; color: #721c24; display:block !important; }
-        .info { background: #d1ecf1; color: #0c5460; display:block !important; }
+        *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif;}
+        body{background:linear-gradient(135deg,#4facfe,#00f2fe);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+        .card{background:white;border-radius:20px;padding:30px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.15);}
+        h2{text-align:center;color:#1e40af;margin-bottom:25px;}
+        .info{background:#e0f2fe;color:#1e40af;padding:12px;border-radius:10px;font-size:14px;margin-bottom:20px;line-height:1.5;}
+        input{width:100%;padding:14px;font-size:16px;border:2px solid #e5e7eb;border-radius:10px;margin-bottom:15px;}
+        input:focus{outline:none;border-color:#3b82f6;}
+        button{width:100%;padding:14px;font-size:17px;border:none;border-radius:10px;cursor:pointer;font-weight:bold;transition:.3s;}
+        #sendBtn{background:linear-gradient(135deg,#4facfe,#00f2fe);color:white;}
+        #sendBtn:disabled{background:#ccc;cursor:not-allowed;}
+        .status{margin-top:15px;padding:12px;border-radius:8px;display:none;}
+        .success{background:#d4edda;color:#155724;display:block;}
+        .error{background:#f8d7da;color:#721c24;display:block;}
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>📍 Send My Location</h2>
-        <button id="sendBtn">📡 Share Current Location</button>
-        <div class="status" id="status"></div>
+        <h2>📍 ကျွန်ုပ်၏တည်နေရာ မျှဝေရန်</h2>
+        
+        <div class="info">
+            <strong>အသုံးပြုနည်း-</strong><br>
+            ၁။ သင့်နာမည်နှင့် စကားဝှက်သတ်မှတ်ပါ<br>
+            ၂။ စကားဝှက်ကို သင်ယုံကြည်သူထံသာ ပေးပါ<br>
+            ၃။ ခလုတ်နှိပ်ပြီး တည်နေရာပို့ပါ
+        </div>
+        
+        <input type="text" id="name" placeholder="သင့်နာမည်">
+        <input type="password" id="sharePass" placeholder="ကြည့်ရှုခွင့် စကားဝှက် သတ်မှတ်ပါ">
+        <button id="sendBtn">📡 တည်နေရာပို့မည်</button>
+        
+        <div id="status" class="status"></div>
     </div>
 
     <script>
@@ -41,6 +54,8 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        const nameInput = document.getElementById('name');
+        const passInput = document.getElementById('sharePass');
         const sendBtn = document.getElementById('sendBtn');
         const status = document.getElementById('status');
 
@@ -49,41 +64,54 @@
             status.className = 'status ' + type;
         }
 
-        sendBtn.addEventListener('click', async () => {
-            showStatus('⏳ Getting location...', 'info');
+        function hashPass(pass) {
+            let h = 0;
+            for(let i=0;i<pass.length;i++)h=((h<<5)-h)+pass.charCodeAt(i);
+            return Math.abs(h).toString(16);
+        }
+
+        sendBtn.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            const pass = passInput.value.trim();
+            
+            if (!name) { showStatus('❌ နာမည်ရိုက်ထည့်ပါ', 'error'); return; }
+            if (!pass) { showStatus('❌ စကားဝှက်သတ်မှတ်ပါ', 'error'); return; }
+
+            showStatus('⏳ တည်နေရာရှာနေသည်...', 'success');
             sendBtn.disabled = true;
 
             if (!navigator.geolocation) {
-                showStatus('❌ Your browser does not support location', 'error');
+                showStatus('❌ ဖုန်းကတည်နေရာမထောက်ပံ့ပါ', 'error');
                 sendBtn.disabled = false;
                 return;
             }
 
             navigator.geolocation.getCurrentPosition(
-                async (position) => {
+                async (pos) => {
                     try {
-                        const data = {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
+                        const safeName = name.replace(/[.#$/[\]]/g, '_');
+                        await db.ref('users/' + safeName).set({
+                            name: name,
+                            passwordHash: hashPass(pass),
+                            latitude: pos.coords.latitude,
+                            longitude: pos.coords.longitude,
                             timestamp: new Date().toLocaleString()
-                        };
-                        
-                        await db.ref('locations').set(data);
-                        showStatus('✅ Location sent successfully!', 'success');
+                        });
+                        showStatus(`✅ ${name} ၏တည်နေရာ လုံခြုံစွာမျှဝေပြီးပါပြီ!`, 'success');
                     } catch (err) {
-                        showStatus('❌ Firebase Error: ' + err.message, 'error');
+                        showStatus('❌ အမှား - ' + err.message, 'error');
                     }
                     sendBtn.disabled = false;
                 },
                 (err) => {
-                    let msg = 'Error: ' + err.message;
-                    if (err.code === 1) msg = '❌ Please ALLOW location access!';
-                    if (err.code === 2) msg = '❌ Cannot determine location';
-                    if (err.code === 3) msg = '❌ Location request timed out';
+                    let msg = '❌ အမှား';
+                    if (err.code === 1) msg = '❌ တည်နေရာခွင့်မပေးထားပါ';
+                    if (err.code === 2) msg = '❌ တည်နေရာရှာမတွေ့ပါ';
+                    if (err.code === 3) msg = '❌ အချိန်ကုန်သွားပါပြီ';
                     showStatus(msg, 'error');
                     sendBtn.disabled = false;
                 },
-                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+                { enableHighAccuracy: true, timeout: 15000 }
             );
         });
     </script>
