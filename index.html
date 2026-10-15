@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👥 လူအားလုံး၏တည်နေရာ</title>
+    <title>👥 တည်နေရာများ ကြည့်ရှုရန်</title>
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-database-compat.js"></script>
     <style>
@@ -11,62 +11,52 @@
         body{background:linear-gradient(135deg,#4facfe,#00f2fe);min-height:100vh;padding:20px;}
         .container{max-width:500px;margin:0 auto;}
         h1{text-align:center;color:white;margin-bottom:10px;font-size:22px;}
-        .subtitle{text-align:center;color:rgba(255,255,255,.9);margin-bottom:15px;font-size:14px;}
+        .subtitle{text-align:center;color:rgba(255,255,255,.9);margin-bottom:20px;font-size:14px;}
         
-        .my-location-card{background:rgba(255,255,255,.95);border-radius:16px;padding:16px;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,0,0,.1);}
-        .my-location-title{font-size:16px;font-weight:bold;color:#1e40af;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
-        .my-location-title span{font-size:18px;}
+        .my-box{background:white;border-radius:16px;padding:20px;margin-bottom:25px;box-shadow:0 4px 12px rgba(0,0,0,.1);}
+        .my-title{font-size:17px;font-weight:bold;color:#1e40af;margin-bottom:12px;}
+        .detect-btn{width:100%;padding:12px;font-size:15px;border:none;border-radius:8px;background:#3b82f6;color:white;cursor:pointer;font-weight:bold;}
+        .detect-btn:disabled{background:#ccc;}
+        .my-coords{margin-top:12px;display:none;}
+        .my-coords.show{display:block;}
         .coord-row{display:flex;justify-content:space-between;padding:5px 0;font-size:14px;}
-        .coord-label{color:#64748b;}
-        .coord-value{color:#1f2937;font-weight:500;}
-        .detect-btn{background:#6b7280;color:white;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;width:100%;margin-top:10px;}
-        .coords-area{margin-top:10px;display:none;}
-        .coords-area.show{display:block;}
+        .label{color:#64748b;}
+        .value{color:#1e40af;font-weight:600;}
+        .map-link{display:block;text-align:center;background:#16a34a;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:bold;margin-top:10px;}
         
+        .count{text-align:center;color:white;margin-bottom:15px;}
         .user-card{background:white;border-radius:16px;padding:18px;margin-bottom:15px;box-shadow:0 4px 12px rgba(0,0,0,.08);}
-        .user-name{font-size:18px;font-weight:bold;color:#1e40af;margin-bottom:12px;}
+        .user-name{font-size:17px;font-weight:bold;color:#1e40af;margin-bottom:12px;}
         .locked{background:#fef3c7;border:2px dashed #f59e0b;border-radius:10px;padding:20px;text-align:center;}
-        .locked-icon{font-size:32px;margin-bottom:10px;}
-        .info-row{margin-bottom:8px;}
-        .label{font-size:12px;color:#64748b;}
-        .value{font-size:14px;color:#1f2937;font-weight:500;}
-        .map-btn{display:block;background:#16a34a;color:white;text-decoration:none;text-align:center;padding:10px;border-radius:8px;font-weight:bold;margin-top:12px;}
-        .unlock-btn{background:#3b82f6;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:14px;margin-top:10px;}
-        .pass-input{width:100%;padding:10px;font-size:15px;border:2px solid #e5e7eb;border-radius:6px;margin-top:10px;}
+        .locked-icon{font-size:30px;margin-bottom:8px;}
+        .pass-input{width:100%;padding:10px;font-size:15px;border:2px solid #e5e7eb;border-radius:6px;margin:10px 0;}
+        .unlock-btn{background:#3b82f6;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:bold;}
+        .info-row{margin-bottom:6px;}
         .time{font-size:12px;color:#9ca3af;margin-top:8px;}
         .empty{text-align:center;padding:40px 20px;color:white;}
-        .count-box{background:rgba(255,255,255,.2);border-radius:20px;padding:6px 16px;text-align:center;margin-bottom:15px;color:white;font-size:14px;display:inline-block;}
-        .header-center{text-align:center;margin-bottom:15px;}
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>👥 လူအားလုံး၏တည်နေရာ</h1>
-        <p class="subtitle">စကားဝှက်သိသူမှသာ တည်နေရာကိုကြည့်နိုင်ပါသည်</p>
+        <h1>👥 တည်နေရာများ ကြည့်ရှုရန်</h1>
+        <p class="subtitle">နှစ်ဖက်စလုံး ကိုယ့်နေရာနှင့် အခြားသူ့နေရာကို ကြည့်နိုင်ပါသည်</p>
 
-        <!-- 👀 ကြည့်သူကိုယ်တိုင်၏ တည်နေရာ -->
-        <div class="my-location-card">
-            <div class="my-location-title"><span>📍</span> ကျွန်ုပ်၏တည်နေရာ</div>
-            <button class="detect-btn" id="detectMyLocBtn">🔍 ကျွန်ုပ်၏တည်နေရာကို ပြပါ</button>
-            <div class="coords-area" id="myCoordsArea">
-                <div class="coord-row">
-                    <span class="coord-label">ကျွန်ုပ် လတီကျူ့ဒ် :</span>
-                    <span class="coord-value" id="myLat">--</span>
-                </div>
-                <div class="coord-row">
-                    <span class="coord-label">ကျွန်ုပ် လောင်ဂျီကျူ့ဒ် :</span>
-                    <span class="coord-value" id="myLng">--</span>
-                </div>
+        <!-- 👀 ကိုယ့်နေရာ -->
+        <div class="my-box">
+            <div class="my-title">👁️ ကျွန်ုပ်ဘယ်ရောက်နေလဲ</div>
+            <button id="detectMyBtn" class="detect-btn">🔍 ကျွန်ုပ်၏တည်နေရာကို ရှာပါ</button>
+            <div id="myCoords" class="my-coords">
+                <div class="coord-row"><span class="label">ကျွန်ုပ် လတီကျူ့ဒ် :</span><span class="value" id="mylat">--</span></div>
+                <div class="coord-row"><span class="label">ကျွန်ုပ် လောင်ဂျီကျူ့ဒ် :</span><span class="value" id="mylng">--</span></div>
+                <a id="myMap" href="" target="_blank" class="map-link">🌍 မြေပုံတွင်ကြည့်ရန်</a>
             </div>
         </div>
 
-        <div class="header-center"><span class="count-box">အခြားသူများ - <span id="userCount">0</span> ဦး</span></div>
-        
+        <div class="count">အခြားသူများ၏တည်နေရာ - <span id="total">0</span> ဦး</div>
         <div id="usersList"></div>
-        
-        <div id="emptyState" class="empty">
+        <div id="empty" class="empty">
             <p style="font-size:40px;margin-bottom:10px;">📍</p>
-            <p>အခြားသူမှ တည်နေရာမမျှဝေသေးပါ</p>
+            <p>မည်သူမျှ မမျှဝေသေးပါ</p>
         </div>
     </div>
 
@@ -80,74 +70,66 @@
             messagingSenderId: "211556349618",
             appId: "1:211556349618:web:bd5b82d1a01202064bbbab"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        const detectMyLocBtn = document.getElementById('detectMyLocBtn');
-        const myCoordsArea = document.getElementById('myCoordsArea');
-        const myLat = document.getElementById('myLat');
-        const myLng = document.getElementById('myLng');
-        const usersList = document.getElementById('usersList');
-        const emptyState = document.getElementById('emptyState');
-        const userCount = document.getElementById('userCount');
-        
-        const unlockedUsers = {};
+        const unlocked = {};
 
-        // 👀 ကိုယ့်ကိုယ်နေရာရှာခြင်း
-        detectMyLocBtn.addEventListener('click', () => {
-            detectMyLocBtn.textContent = "⏳ ရှာနေသည်...";
-            detectMyLocBtn.disabled = true;
-
-            if (!navigator.geolocation) {
-                alert('❌ သင့်ဖုန်းကတည်နေရာမထောက်ပံ့ပါ');
-                detectMyLocBtn.textContent = "🔍 ကျွန်ုပ်၏တည်နေရာကို ပြပါ";
-                detectMyLocBtn.disabled = false;
+        // ကိုယ့်နေရာရှာခြင်း
+        document.getElementById('detectMyBtn').addEventListener('click', function(){
+            this.disabled = true;
+            this.textContent = '⏳ ရှာနေသည်...';
+            if(!navigator.geolocation){
+                alert('❌ တည်နေရာမထောက်ပံ့ပါ');
+                this.disabled = false;
+                this.textContent = '🔍 ကျွန်ုပ်၏တည်နေရာကို ရှာပါ';
                 return;
             }
-
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
-                    myLat.textContent = pos.coords.latitude.toFixed(6);
-                    myLng.textContent = pos.coords.longitude.toFixed(6);
-                    myCoordsArea.classList.add('show');
-                    detectMyLocBtn.textContent = "✅ တည်နေရာပြပြီး";
-                    detectMyLocBtn.style.background = '#16a34a';
+                    document.getElementById('mylat').textContent = pos.coords.latitude.toFixed(6);
+                    document.getElementById('mylng').textContent = pos.coords.longitude.toFixed(6);
+                    document.getElementById('myMap').href = `https://google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                    document.getElementById('myCoords').classList.add('show');
+                    this.textContent = '✅ တည်နေရာပြပြီး';
+                    this.style.background = '#16a34a';
                 },
-                (err) => {
-                    let msg = '❌ အမှား';
-                    if (err.code === 1) msg = '❌ တည်နေရာခွင့်မပေးထားပါ';
-                    if (err.code === 2) msg = '❌ နေရာရှာမတွေ့ပါ';
-                    if (err.code === 3) msg = '❌ အချိန်ကုန်သွားပါပြီ';
-                    alert(msg);
-                    detectMyLocBtn.textContent = "🔍 ကျွန်ုပ်၏တည်နေရာကို ပြပါ";
-                    detectMyLocBtn.disabled = false;
+                () => {
+                    alert('❌ တည်နေရာရှာမတွေ့ပါ — VPN ပိတ်ပါ၊ အပြင်သို့သွားပါ');
+                    this.disabled = false;
+                    this.textContent = '🔍 ကျွန်ုပ်၏တည်နေရာကို ရှာပါ';
                 },
-                { enableHighAccuracy: true, timeout: 15000 }
+                {enableHighAccuracy:true, timeout:15000}
             );
         });
 
         function hashPass(pass) {
-            let h = 0;
-            for(let i=0;i<pass.length;i++)h=((h<<5)-h)+pass.charCodeAt(i);
+            let h=0;for(let i=0;i<pass.length;i++)h=((h<<5)-h)+pass.charCodeAt(i);
             return Math.abs(h).toString(16);
         }
 
-        function renderUserCard(key, user) {
-            if (unlockedUsers[key]) {
+        window.tryUnlock = function(key){
+            const input = document.getElementById('pass-'+key);
+            db.ref('users/'+key).once('value').then(snap=>{
+                const user = snap.val();
+                if(user.passwordHash === hashPass(input.value)){
+                    unlocked[key]=true;
+                    renderAll();
+                }else{
+                    alert('❌ စကားဝှက်မှားနေပါသည်');
+                }
+            });
+        };
+
+        function renderCard(key, user){
+            if(unlocked[key]){
                 return `
                     <div class="user-card">
                         <div class="user-name">🔓 ${user.name}</div>
-                        <div class="info-row">
-                            <div class="label">လတီကျူ့ဒ်</div>
-                            <div class="value">${user.latitude.toFixed(6)}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="label">လောင်ဂျီကျူ့ဒ်</div>
-                            <div class="value">${user.longitude.toFixed(6)}</div>
-                        </div>
-                        <a href="https://google.com/maps?q=${user.latitude},${user.longitude}" target="_blank" class="map-btn">🌍 မြေပုံပေါ်တွင်ကြည့်ရှုရန်</a>
-                        <div class="time">⏰ နောက်ဆုံးအပ်ဒိတ် - ${user.timestamp}</div>
+                        <div class="info-row"><span class="label">လတီကျူ့ဒ် :</span> <span class="value">${user.latitude.toFixed(6)}</span></div>
+                        <div class="info-row"><span class="label">လောင်ဂျီကျူ့ဒ် :</span> <span class="value">${user.longitude.toFixed(6)}</span></div>
+                        <a href="https://google.com/maps?q=${user.latitude},${user.longitude}" target="_blank" class="map-link">🌍 မြေပုံပေါ်တွင်ကြည့်ရန်</a>
+                        <div class="time">⏰ ${user.timestamp}</div>
                     </div>
                 `;
             }
@@ -155,51 +137,33 @@
                 <div class="user-card">
                     <div class="locked">
                         <div class="locked-icon">🔒</div>
-                        <div style="font-weight:bold;color:#92400e;margin-bottom:5px;">${user.name}</div>
-                        <div style="font-size:14px;color:#78350f;margin-bottom:10px;">စကားဝှက်ဖြင့်ကာကွယ်ထားသည်</div>
-                        <input type="password" class="pass-input" id="pass-${key}" placeholder="စကားဝှက်ထည့်ပါ">
+                        <div style="font-weight:bold;color:#92400e;">${user.name}</div>
+                        <div style="font-size:14px;color:#78350f;margin-bottom:8px;">စကားဝှက်ဖြင့်ကာကွယ်ထားသည်</div>
+                        <input type="password" id="pass-${key}" class="pass-input" placeholder="စကားဝှက်ထည့်ပါ">
                         <button class="unlock-btn" onclick="tryUnlock('${key}')">ဖွင့်ကြည့်ရန်</button>
                     </div>
                 </div>
             `;
         }
 
-        window.tryUnlock = function(key) {
-            const input = document.getElementById(`pass-${key}`);
-            const enteredPass = input.value;
-            db.ref('users/' + key).once('value').then(snap => {
-                const user = snap.val();
-                if (user && user.passwordHash === hashPass(enteredPass)) {
-                    unlockedUsers[key] = true;
-                    renderAll();
-                } else {
-                    alert('❌ စကားဝှက်မှားနေပါသည်!');
-                }
-            });
-        };
-
-        function renderAll() {
-            db.ref('users').once('value').then(snapshot => {
-                const data = snapshot.val();
-                usersList.innerHTML = '';
-                
-                if (!data) {
-                    emptyState.style.display = 'block';
-                    userCount.textContent = '0';
+        function renderAll(){
+            db.ref('users').once('value').then(snap=>{
+                const data = snap.val();
+                const list = document.getElementById('usersList');
+                list.innerHTML='';
+                if(!data){
+                    document.getElementById('empty').style.display='block';
+                    document.getElementById('total').textContent='0';
                     return;
                 }
-
-                emptyState.style.display = 'none';
+                document.getElementById('empty').style.display='none';
                 const keys = Object.keys(data);
-                userCount.textContent = keys.length;
-
-                keys.forEach(key => {
-                    usersList.innerHTML += renderUserCard(key, data[key]);
-                });
+                document.getElementById('total').textContent=keys.length;
+                keys.forEach(k=>list.innerHTML+=renderCard(k, data[k]));
             });
         }
 
-        db.ref('users').on('value', () => renderAll());
+        db.ref('users').on('value', renderAll);
     </script>
 </body>
 </html>
