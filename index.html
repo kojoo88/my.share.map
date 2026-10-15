@@ -1,9 +1,125 @@
-const firebaseConfig = {
-    apiKey: "AIzaSyCrto0f0amUQbRpfshWgyvErrurzq0Ksjw",
-    authDomain: "my-location-share-8bf0f.firebaseapp.com",
-    databaseURL: "https://my-location-share-8bf0f-default-rtdb.firebaseio.com",
-    projectId: "my-location-share-8bf0f",
-    storageBucket: "my-location-share-8bf0f.firebasestorage.app",
-    messagingSenderId: "211556349618",
-    appId: "1:211556349618:web:bd5b82d1a01202064bbbab"
-};
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📍 မျှဝေထားသောတည်နေရာ</title>
+    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, sans-serif; }
+        body {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: white; border-radius: 20px; padding: 30px;
+            max-width: 420px; width: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+        h1 { color: #1d4ed8; font-size: 22px; margin-bottom: 5px; }
+        .subtitle { color: #64748b; font-size: 14px; margin-bottom: 25px; }
+        .dot {
+            display: inline-block; width: 10px; height: 10px;
+            background: #22c55e; border-radius: 50%; margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+        .info-box {
+            background: #eff6ff; border-radius: 12px; padding: 20px;
+            margin-bottom: 20px; text-align: left;
+        }
+        .info-row { margin-bottom: 12px; font-size: 15px; }
+        .info-row:last-child { margin-bottom: 0; }
+        .label { color: #64748b; font-size: 13px; margin-bottom: 3px; }
+        .value { color: #1e40af; font-weight: 600; font-size: 16px; }
+        .time { color: #f59e0b; font-size: 13px; margin-bottom: 15px; }
+        .map-link {
+            display: block; background: #16a34a; color: white;
+            padding: 15px; border-radius: 12px; text-decoration: none;
+            font-weight: 600; font-size: 16px; transition: 0.3s;
+        }
+        .map-link:hover { background: #15803d; }
+        .waiting { padding: 40px 20px; color: #64748b; }
+        .waiting-icon { font-size: 48px; margin-bottom: 15px; }
+        .last-seen { margin-top: 15px; font-size: 13px; color: #9ca3af; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>📍 မျှဝေထားသောတည်နေရာ</h1>
+        <p class="subtitle"><span class="dot"></span> တိုက်ရိုက်အပ်ဒိတ်လုပ်နေသည်</p>
+
+        <div id="waitingArea" class="waiting">
+            <div class="waiting-icon">⏳</div>
+            <p>တည်နေရာကို စောင့်မျှော်နေသည်...</p>
+            <p style="font-size:13px; margin-top:10px;">ပေးပို့သူသည် နေရာမပို့ရသေးပါ</p>
+        </div>
+
+        <div id="locationArea" style="display:none;">
+            <div class="time">⏰ နောက်ဆုံးအပ်ဒိတ် - <span id="updateTime">--</span></div>
+            <div class="info-box">
+                <div class="info-row">
+                    <div class="label">လတီကျူ့ဒ်</div>
+                    <div class="value" id="lat">--</div>
+                </div>
+                <div class="info-row">
+                    <div class="label">လောင်ဂျီကျူ့ဒ်</div>
+                    <div class="value" id="lon">--</div>
+                </div>
+            </div>
+            <a href="" id="gmapLink" class="map-link" target="_blank">🌍 Google Maps တွင်ကြည့်ရှုရန်</a>
+            <p class="last-seen">အလိုအလျောက်အပ်ဒိတ်လုပ်နေသည်</p>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrto0f0amUQbRpfshWgyvErrurzq0Ksjw",
+            authDomain: "my-location-share-8bf0f.firebaseapp.com",
+            databaseURL: "https://my-location-share-8bf0f-default-rtdb.firebaseio.com",
+            projectId: "my-location-share-8bf0f",
+            storageBucket: "my-location-share-8bf0f.firebasestorage.app",
+            messagingSenderId: "211556349618",
+            appId: "1:211556349618:web:bd5b82d1a01202064bbbab"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const locRef = db.ref('locations');
+
+        const waitingArea = document.getElementById('waitingArea');
+        const locationArea = document.getElementById('locationArea');
+        const latEl = document.getElementById('lat');
+        const lonEl = document.getElementById('lon');
+        const updateTimeEl = document.getElementById('updateTime');
+        const gmapLink = document.getElementById('gmapLink');
+
+        locRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.latitude && data.longitude) {
+                waitingArea.style.display = 'none';
+                locationArea.style.display = 'block';
+                
+                latEl.textContent = data.latitude.toFixed(7);
+                lonEl.textContent = data.longitude.toFixed(7);
+                updateTimeEl.textContent = data.timestamp || 'မသိရှိ';
+                
+                const mapUrl = `https://www.google.com/maps?q=${data.latitude},${data.longitude}&z=16`;
+                gmapLink.href = mapUrl;
+            } else {
+                waitingArea.style.display = 'block';
+                locationArea.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+    </html>
+    
