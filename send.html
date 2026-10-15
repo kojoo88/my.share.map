@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Send Location</title>
-    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-database-compat.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: linear-gradient(135deg, #4facfe, #00f2fe); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -13,13 +13,11 @@
         h2 { text-align: center; color: #333; margin-bottom: 25px; }
         button { width: 100%; padding: 14px; font-size: 17px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         #sendBtn { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; }
-        #sendBtn:hover { transform: translateY(-2px); }
-        #sendBtn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
-        .status { margin-top: 20px; text-align: center; font-size: 15px; min-height: 24px; }
-        .success { color: #28a745; }
-        .error { color: #dc3545; }
-        .info { color: #007bff; }
-        .coords { margin-top: 15px; padding: 10px; background: #f1f1f1; border-radius: 8px; font-size: 13px; display: none; }
+        #sendBtn:disabled { background: #ccc; cursor: not-allowed; }
+        .status { margin-top: 20px; padding: 12px; border-radius: 8px; text-align: center; display: none; }
+        .success { background: #d4edda; color: #155724; display:block !important; }
+        .error { background: #f8d7da; color: #721c24; display:block !important; }
+        .info { background: #d1ecf1; color: #0c5460; display:block !important; }
     </style>
 </head>
 <body>
@@ -27,7 +25,6 @@
         <h2>📍 Send My Location</h2>
         <button id="sendBtn">📡 Share Current Location</button>
         <div class="status" id="status"></div>
-        <div class="coords" id="coords"></div>
     </div>
 
     <script>
@@ -41,63 +38,54 @@
             appId: "1:211556349618:web:bd5b82d1a01202064bbbab"
         };
 
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.database(app);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
         const sendBtn = document.getElementById('sendBtn');
         const status = document.getElementById('status');
-        const coords = document.getElementById('coords');
 
-        sendBtn.addEventListener('click', () => {
-            status.textContent = '';
-            coords.style.display = 'none';
-            
+        function showStatus(msg, type) {
+            status.textContent = msg;
+            status.className = 'status ' + type;
+        }
+
+        sendBtn.addEventListener('click', async () => {
+            showStatus('⏳ Getting location...', 'info');
+            sendBtn.disabled = true;
+
             if (!navigator.geolocation) {
-                status.textContent = '❌ Geolocation not supported';
-                status.className = 'status error';
+                showStatus('❌ Your browser does not support location', 'error');
+                sendBtn.disabled = false;
                 return;
             }
 
-            sendBtn.disabled = true;
-            sendBtn.textContent = '⏳ Getting location...';
-
             navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    const timestamp = new Date().toLocaleString();
-
-                    db.ref('locations').set({
-                        latitude: lat,
-                        longitude: lng,
-                        timestamp: timestamp
-                    }).then(() => {
-                        status.textContent = '✅ Location sent successfully!';
-                        status.className = 'status success';
-                        coords.innerHTML = `Latitude: ${lat}<br>Longitude: ${lng}<br>Time: ${timestamp}`;
-                        coords.style.display = 'block';
-                    }).catch((err) => {
-                        status.textContent = '❌ Error: ' + err.message;
-                        status.className = 'status error';
-                    }).finally(() => {
-                        sendBtn.disabled = false;
-                        sendBtn.textContent = '📡 Share Current Location';
-                    });
-                },
-                (error) => {
-                    let msg = 'Unknown error';
-                    if (error.code === 1) msg = 'Permission denied. Please allow location access.';
-                    else if (error.code === 2) msg = 'Location unavailable.';
-                    else if (error.code === 3) msg = 'Request timed out.';
-                    status.textContent = '❌ ' + msg;
-                    status.className = 'status error';
+                async (position) => {
+                    try {
+                        const data = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            timestamp: new Date().toLocaleString()
+                        };
+                        
+                        await db.ref('locations').set(data);
+                        showStatus('✅ Location sent successfully!', 'success');
+                    } catch (err) {
+                        showStatus('❌ Firebase Error: ' + err.message, 'error');
+                    }
                     sendBtn.disabled = false;
-                    sendBtn.textContent = '📡 Share Current Location';
                 },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                (err) => {
+                    let msg = 'Error: ' + err.message;
+                    if (err.code === 1) msg = '❌ Please ALLOW location access!';
+                    if (err.code === 2) msg = '❌ Cannot determine location';
+                    if (err.code === 3) msg = '❌ Location request timed out';
+                    showStatus(msg, 'error');
+                    sendBtn.disabled = false;
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
             );
         });
     </script>
 </body>
-                                </html>
-                                
+</html>
