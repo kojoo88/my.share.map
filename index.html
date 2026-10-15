@@ -3,53 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>မျှဝေထားသောတည်နေရာ</title>
+    <title>👥 လူအားလုံး၏တည်နေရာ</title>
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-database-compat.js"></script>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,Segoe UI,sans-serif;}
-        body{background:linear-gradient(135deg,#4facfe,#00f2fe);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-        .card{background:#121212;border-radius:24px;padding:40px 30px;width:100%;max-width:420px;color:#fff;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.25);}
-        h1{font-size:24px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;}
-        .status{color:#4ade80;font-size:15px;margin:12px 0 30px;display:flex;align-items:center;justify-content:center;gap:8px;}
-        .dot{width:12px;height:12px;background:#4ade80;border-radius:50%;display:inline-block;animation:pulse 2s infinite;}
-        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
-        .waiting{padding:30px 10px;color:#9ca3af;}
-        .spinner{display:inline-block;width:32px;height:32px;border:3px solid #373;border-top-color:#4facfe;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:15px;}
-        @keyframes spin{to{transform:rotate(360deg);}}
-        .data{text-align:left;display:none;}
-        .data.show{display:block;}
-        .item{background:#1e1e1e;border-radius:12px;padding:14px;margin-bottom:10px;}
-        .label{color:#9ca3af;font-size:13px;margin-bottom:4px;}
-        .value{font-size:16px;font-weight:500;word-break:break-all;}
-        .map-btn{display:block;background:linear-gradient(135deg,#4ade80,#22c55e);color:#000;text-decoration:none;font-weight:bold;padding:14px;border-radius:12px;text-align:center;margin-top:10px;}
-        .time{text-align:center;color:#9ca3af;font-size:13px;margin-top:15px;}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif;}
+        body{background:linear-gradient(135deg,#4facfe,#00f2fe);min-height:100vh;padding:20px;}
+        .container{max-width:500px;margin:0 auto;}
+        h1{text-align:center;color:white;margin-bottom:10px;font-size:22px;}
+        .subtitle{text-align:center;color:rgba(255,255,255,.9);margin-bottom:25px;font-size:14px;}
+        .user-card{background:white;border-radius:16px;padding:18px;margin-bottom:15px;box-shadow:0 4px 12px rgba(0,0,0,.08);}
+        .user-name{font-size:18px;font-weight:bold;color:#1e40af;margin-bottom:12px;}
+        .locked{background:#fef3c7;border:2px dashed #f59e0b;border-radius:10px;padding:20px;text-align:center;}
+        .locked-icon{font-size:32px;margin-bottom:10px;}
+        .info-row{margin-bottom:8px;}
+        .label{font-size:12px;color:#64748b;}
+        .value{font-size:14px;color:#1f2937;font-weight:500;}
+        .map-btn{display:block;background:#16a34a;color:white;text-decoration:none;text-align:center;padding:10px;border-radius:8px;font-weight:bold;margin-top:12px;}
+        .unlock-btn{background:#3b82f6;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:14px;margin-top:10px;}
+        .pass-input{width:100%;padding:10px;font-size:15px;border:2px solid #e5e7eb;border-radius:6px;margin-top:10px;}
+        .time{font-size:12px;color:#9ca3af;margin-top:8px;}
+        .empty{text-align:center;padding:50px 20px;color:white;}
+        .count-box{background:rgba(255,255,255,.2);border-radius:20px;padding:6px 16px;text-align:center;margin-bottom:20px;color:white;font-size:14px;display:inline-block;}
+        .header-center{text-align:center;margin-bottom:15px;}
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>📍 မျှဝေထားသောတည်နေရာ</h1>
-        <div class="status"><span class="dot"></span> တိုက်ရိုက်အပ်ဒိတ်လုပ်နေသည်</div>
-
-        <div class="waiting" id="waiting">
-            <div class="spinner"></div>
-            <div>တည်နေရာကို စောင့်မျှော်နေသည်...</div>
-        </div>
-
-        <div class="data" id="dataPanel">
-            <div class="item">
-                <div class="label">လတီကျူ့ဒ်</div>
-                <div class="value" id="lat">--</div>
-            </div>
-            <div class="item">
-                <div class="label">လောင်ဂျီကျူ့ဒ်</div>
-                <div class="value" id="lng">--</div>
-            </div>
-            <div class="item">
-                <div class="label">ရောက်ရှိချိန်</div>
-                <div class="value" id="time">--</div>
-            </div>
-            <a id="mapLink" href="" target="_blank" class="map-btn">🌍 Google Maps တွင်ကြည့်ရှုရန်</a>
+    <div class="container">
+        <h1>👥 လူအားလုံး၏တည်နေရာ</h1>
+        <p class="subtitle">စကားဝှက်သိသူမှသာ တည်နေရာကိုကြည့်နိုင်ပါသည်</p>
+        <div class="header-center"><span class="count-box">စုစုပေါင်း - <span id="userCount">0</span> ဦး</span></div>
+        
+        <div id="usersList"></div>
+        
+        <div id="emptyState" class="empty">
+            <p style="font-size:48px;margin-bottom:15px;">📍</p>
+            <p>မည်သူမျှ တည်နေရာမမျှဝေသေးပါ</p>
         </div>
     </div>
 
@@ -67,35 +56,85 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        const waiting = document.getElementById('waiting');
-        const dataPanel = document.getElementById('dataPanel');
-        const latEl = document.getElementById('lat');
-        const lngEl = document.getElementById('lng');
-        const timeEl = document.getElementById('time');
-        const mapLink = document.getElementById('mapLink');
+        const usersList = document.getElementById('usersList');
+        const emptyState = document.getElementById('emptyState');
+        const userCount = document.getElementById('userCount');
+        
+        const unlockedUsers = {};
 
-        console.log('📡 စတင်ပြီး — ဒေတာစောင့်နေသည်...');
+        function hashPass(pass) {
+            let h = 0;
+            for(let i=0;i<pass.length;i++)h=((h<<5)-h)+pass.charCodeAt(i);
+            return Math.abs(h).toString(16);
+        }
 
-        db.ref('locations').on('value', (snapshot) => {
-            const data = snapshot.val();
-            console.log('📥 ရရှိလိုက်သောဒေတာ:', data);
-            
-            if (data && data.latitude) {
-                waiting.style.display = 'none';
-                dataPanel.classList.add('show');
-                
-                latEl.textContent = data.latitude.toFixed(6);
-                lngEl.textContent = data.longitude.toFixed(6);
-                timeEl.textContent = data.timestamp || 'မှတ်တမ်းမရှိ';
-                mapLink.href = `https://www.google.com/maps?q=${data.latitude},${data.longitude}`;
-            } else {
-                waiting.style.display = 'block';
-                dataPanel.classList.remove('show');
+        function renderUserCard(key, user) {
+            if (unlockedUsers[key]) {
+                return `
+                    <div class="user-card">
+                        <div class="user-name">🔓 ${user.name}</div>
+                        <div class="info-row">
+                            <div class="label">လတီကျူ့ဒ်</div>
+                            <div class="value">${user.latitude.toFixed(6)}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="label">လောင်ဂျီကျူ့ဒ်</div>
+                            <div class="value">${user.longitude.toFixed(6)}</div>
+                        </div>
+                        <a href="https://google.com/maps?q=${user.latitude},${user.longitude}" target="_blank" class="map-btn">🌍 မြေပုံပေါ်တွင်ကြည့်ရှုရန်</a>
+                        <div class="time">⏰ နောက်ဆုံးအပ်ဒိတ် - ${user.timestamp}</div>
+                    </div>
+                `;
             }
-        }, (error) => {
-            console.error('❌ ဖတ်ရန်မအောင်မြင်:', error);
-            waiting.innerHTML = `<div style="color:#f87171">❌ အမှား - ${error.message}</div>`;
-        });
+            return `
+                <div class="user-card">
+                    <div class="locked">
+                        <div class="locked-icon">🔒</div>
+                        <div style="font-weight:bold;color:#92400e;margin-bottom:5px;">${user.name}</div>
+                        <div style="font-size:14px;color:#78350f;margin-bottom:10px;">စကားဝှက်ဖြင့်ကာကွယ်ထားသည်</div>
+                        <input type="password" class="pass-input" id="pass-${key}" placeholder="စကားဝှက်ထည့်ပါ">
+                        <button class="unlock-btn" onclick="tryUnlock('${key}')">ဖွင့်ကြည့်ရန်</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.tryUnlock = function(key) {
+            const input = document.getElementById(`pass-${key}`);
+            const enteredPass = input.value;
+            db.ref('users/' + key).once('value').then(snap => {
+                const user = snap.val();
+                if (user && user.passwordHash === hashPass(enteredPass)) {
+                    unlockedUsers[key] = true;
+                    renderAll();
+                } else {
+                    alert('❌ စကားဝှက်မှားနေပါသည်!');
+                }
+            });
+        };
+
+        function renderAll() {
+            db.ref('users').once('value').then(snapshot => {
+                const data = snapshot.val();
+                usersList.innerHTML = '';
+                
+                if (!data) {
+                    emptyState.style.display = 'block';
+                    userCount.textContent = '0';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+                const keys = Object.keys(data);
+                userCount.textContent = keys.length;
+
+                keys.forEach(key => {
+                    usersList.innerHTML += renderUserCard(key, data[key]);
+                });
+            });
+        }
+
+        db.ref('users').on('value', () => renderAll());
     </script>
 </body>
 </html>
