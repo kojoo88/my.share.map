@@ -11,7 +11,18 @@
         body{background:linear-gradient(135deg,#4facfe,#00f2fe);min-height:100vh;padding:20px;}
         .container{max-width:500px;margin:0 auto;}
         h1{text-align:center;color:white;margin-bottom:10px;font-size:22px;}
-        .subtitle{text-align:center;color:rgba(255,255,255,.9);margin-bottom:25px;font-size:14px;}
+        .subtitle{text-align:center;color:rgba(255,255,255,.9);margin-bottom:15px;font-size:14px;}
+        
+        .my-location-card{background:rgba(255,255,255,.95);border-radius:16px;padding:16px;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,0,0,.1);}
+        .my-location-title{font-size:16px;font-weight:bold;color:#1e40af;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+        .my-location-title span{font-size:18px;}
+        .coord-row{display:flex;justify-content:space-between;padding:5px 0;font-size:14px;}
+        .coord-label{color:#64748b;}
+        .coord-value{color:#1f2937;font-weight:500;}
+        .detect-btn{background:#6b7280;color:white;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;width:100%;margin-top:10px;}
+        .coords-area{margin-top:10px;display:none;}
+        .coords-area.show{display:block;}
+        
         .user-card{background:white;border-radius:16px;padding:18px;margin-bottom:15px;box-shadow:0 4px 12px rgba(0,0,0,.08);}
         .user-name{font-size:18px;font-weight:bold;color:#1e40af;margin-bottom:12px;}
         .locked{background:#fef3c7;border:2px dashed #f59e0b;border-radius:10px;padding:20px;text-align:center;}
@@ -23,8 +34,8 @@
         .unlock-btn{background:#3b82f6;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:14px;margin-top:10px;}
         .pass-input{width:100%;padding:10px;font-size:15px;border:2px solid #e5e7eb;border-radius:6px;margin-top:10px;}
         .time{font-size:12px;color:#9ca3af;margin-top:8px;}
-        .empty{text-align:center;padding:50px 20px;color:white;}
-        .count-box{background:rgba(255,255,255,.2);border-radius:20px;padding:6px 16px;text-align:center;margin-bottom:20px;color:white;font-size:14px;display:inline-block;}
+        .empty{text-align:center;padding:40px 20px;color:white;}
+        .count-box{background:rgba(255,255,255,.2);border-radius:20px;padding:6px 16px;text-align:center;margin-bottom:15px;color:white;font-size:14px;display:inline-block;}
         .header-center{text-align:center;margin-bottom:15px;}
     </style>
 </head>
@@ -32,13 +43,30 @@
     <div class="container">
         <h1>👥 လူအားလုံး၏တည်နေရာ</h1>
         <p class="subtitle">စကားဝှက်သိသူမှသာ တည်နေရာကိုကြည့်နိုင်ပါသည်</p>
-        <div class="header-center"><span class="count-box">စုစုပေါင်း - <span id="userCount">0</span> ဦး</span></div>
+
+        <!-- 👀 ကြည့်သူကိုယ်တိုင်၏ တည်နေရာ -->
+        <div class="my-location-card">
+            <div class="my-location-title"><span>📍</span> ကျွန်ုပ်၏တည်နေရာ</div>
+            <button class="detect-btn" id="detectMyLocBtn">🔍 ကျွန်ုပ်၏တည်နေရာကို ပြပါ</button>
+            <div class="coords-area" id="myCoordsArea">
+                <div class="coord-row">
+                    <span class="coord-label">ကျွန်ုပ် လတီကျူ့ဒ် :</span>
+                    <span class="coord-value" id="myLat">--</span>
+                </div>
+                <div class="coord-row">
+                    <span class="coord-label">ကျွန်ုပ် လောင်ဂျီကျူ့ဒ် :</span>
+                    <span class="coord-value" id="myLng">--</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-center"><span class="count-box">အခြားသူများ - <span id="userCount">0</span> ဦး</span></div>
         
         <div id="usersList"></div>
         
         <div id="emptyState" class="empty">
-            <p style="font-size:48px;margin-bottom:15px;">📍</p>
-            <p>မည်သူမျှ တည်နေရာမမျှဝေသေးပါ</p>
+            <p style="font-size:40px;margin-bottom:10px;">📍</p>
+            <p>အခြားသူမှ တည်နေရာမမျှဝေသေးပါ</p>
         </div>
     </div>
 
@@ -56,11 +84,48 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        const detectMyLocBtn = document.getElementById('detectMyLocBtn');
+        const myCoordsArea = document.getElementById('myCoordsArea');
+        const myLat = document.getElementById('myLat');
+        const myLng = document.getElementById('myLng');
         const usersList = document.getElementById('usersList');
         const emptyState = document.getElementById('emptyState');
         const userCount = document.getElementById('userCount');
         
         const unlockedUsers = {};
+
+        // 👀 ကိုယ့်ကိုယ်နေရာရှာခြင်း
+        detectMyLocBtn.addEventListener('click', () => {
+            detectMyLocBtn.textContent = "⏳ ရှာနေသည်...";
+            detectMyLocBtn.disabled = true;
+
+            if (!navigator.geolocation) {
+                alert('❌ သင့်ဖုန်းကတည်နေရာမထောက်ပံ့ပါ');
+                detectMyLocBtn.textContent = "🔍 ကျွန်ုပ်၏တည်နေရာကို ပြပါ";
+                detectMyLocBtn.disabled = false;
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    myLat.textContent = pos.coords.latitude.toFixed(6);
+                    myLng.textContent = pos.coords.longitude.toFixed(6);
+                    myCoordsArea.classList.add('show');
+                    detectMyLocBtn.textContent = "✅ တည်နေရာပြပြီး";
+                    detectMyLocBtn.style.background = '#16a34a';
+                },
+                (err) => {
+                    let msg = '❌ အမှား';
+                    if (err.code === 1) msg = '❌ တည်နေရာခွင့်မပေးထားပါ';
+                    if (err.code === 2) msg = '❌ နေရာရှာမတွေ့ပါ';
+                    if (err.code === 3) msg = '❌ အချိန်ကုန်သွားပါပြီ';
+                    alert(msg);
+                    detectMyLocBtn.textContent = "🔍 ကျွန်ုပ်၏တည်နေရာကို ပြပါ";
+                    detectMyLocBtn.disabled = false;
+                },
+                { enableHighAccuracy: true, timeout: 15000 }
+            );
+        });
 
         function hashPass(pass) {
             let h = 0;
