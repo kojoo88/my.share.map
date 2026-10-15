@@ -3,113 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📍 ကျွန်တော့်တည်နေရာ</title>
+    <title>📍 တည်နေရာအတိအကျ</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui; }
         body {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            background: linear-gradient(135deg, #0f766e, #14b8a6);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             padding: 20px;
         }
         .card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 420px;
-            width: 100%;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            text-align: center;
+            background: white; border-radius: 20px; padding: 30px;
+            max-width: 420px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.15);
         }
-        h1 {
-            color: #1e40af;
-            font-size: 22px;
-            margin-bottom: 10px;
-        }
-        p {
-            color: #6b7280;
-            font-size: 14px;
-            margin-bottom: 25px;
-        }
+        h1 { color: #0f766e; text-align: center; margin-bottom: 5px; font-size: 22px; }
+        .subtitle { text-align: center; color: #64748b; font-size: 14px; margin-bottom: 25px; }
         .btn {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            font-size: 16px;
-            border-radius: 12px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: 600;
-            transition: 0.3s;
+            background: #0f766e; color: white; border: none;
+            padding: 15px; font-size: 16px; border-radius: 12px;
+            width: 100%; font-weight: 600; cursor: pointer; transition: 0.3s;
         }
-        .btn:hover { background: #1d4ed8; }
-        .btn:disabled { background: #9ca3af; cursor: not-allowed; }
-        .result {
-            margin-top: 25px;
-            display: none;
-        }
+        .btn:hover { background: #0d9488; }
+        .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+        .result { margin-top: 20px; display: none; }
         .result.show { display: block; }
-        .coords {
-            background: #eff6ff;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            font-size: 14px;
-            color: #1e3a8a;
+        .info-box {
+            background: #f0fdfa; border-radius: 10px; padding: 15px;
+            margin-bottom: 12px; font-size: 14px; line-height: 1.6;
         }
+        .accuracy {
+            color: #d97706; font-size: 13px; margin-bottom: 12px;
+        }
+        .good { color: #059669; }
+        .warn { color: #d97706; }
         .map-link {
-            display: block;
-            background: #10b981;
-            color: white;
-            padding: 14px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: 0.3s;
+            display: block; background: #2563eb; color: white;
+            padding: 14px; border-radius: 10px; text-align: center;
+            text-decoration: none; font-weight: 600; margin-top: 10px;
         }
-        .map-link:hover { background: #059669; }
+        .map-link:hover { background: #1d4ed8; }
         .copy-btn {
-            background: #f59e0b;
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 8px;
-            margin-top: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            width: 100%;
+            background: #f59e0b; color: white; border: none;
+            padding: 10px; border-radius: 8px; width: 100%;
+            margin-top: 10px; cursor: pointer; font-weight: 500;
         }
-        .loading { display: none; color: #2563eb; margin-top: 15px; }
-        .error { color: #dc2626; margin-top: 15px; display: none; }
+        .loading { text-align: center; color: #0f766e; padding: 20px; display: none; }
+        .error { color: #dc2626; text-align: center; margin-top: 15px; display: none; font-size: 14px; }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>📍 တည်နေရာမျှဝေခြင်း</h1>
-        <p>အောက်ကခလုတ်ကိုနှိပ်ပြီး သင့်တည်နေရာကို ရယူပါ</p>
+        <p class="subtitle">အတိအကျရယူရန် GPS ကိုဖွင့်ပါ</p>
+
+        <button class="btn" id="getLocBtn">📌 တည်နေရာရယူမည်</button>
         
-        <button class="btn" id="getLocBtn">📌 ကျွန်တော့်တည်နေရာကို ရယူမည်</button>
-        
-        <div class="loading" id="loading">⏳ တည်နေရာရှာဖွေနေသည်... ကျေးဇူးပြုပြီး ခွင့်ပြုပါ</div>
-        <div class="error" id="error">❌ တည်နေရာရှာမရပါ။ ကျေးဇူးပြုပြီး တည်နေရာဝန်ဆောင်မှုကို ဖွင့်ပါ။</div>
-        
+        <div class="loading" id="loading">⏳ တည်နေရာရှာဖွေနေသည်...<br>အချိန်အနည်းငယ်ကြာနိုင်ပါတယ်</div>
+        <div class="error" id="error"></div>
+
         <div class="result" id="result">
-            <div class="coords">
-                <strong>လတီကျူ့ဒ် (Latitude):</strong><br>
-                <span id="lat">--</span><br><br>
-                <strong>လောင်ဂျီကျူ့ဒ် (Longitude):</strong><br>
-                <span id="lon">--</span>
+            <div class="accuracy" id="accuracyInfo"></div>
+            <div class="info-box">
+                <strong>📍 လတီကျူ့ဒ်:</strong> <span id="lat">--</span><br>
+                <strong>📍 လောင်ဂျီကျူ့ဒ်:</strong> <span id="lon">--</span><br>
+                <strong>📍 အမြင့်ပေ:</strong> <span id="alt">မရရှိနိုင်</span>
             </div>
-            <a href="" id="mapLink" class="map-link" target="_blank">🌍 မြေပုံပေါ်ကြည့်ရန် / Share Map</a>
-            <button class="copy-btn" id="copyBtn">📋 မြေပုံလင့်ကို ကူးယူမည်</button>
+            <a href="" id="mapLink" class="map-link" target="_blank">🌍 Google Maps တွင်ကြည့်ရန်</a>
+            <button class="copy-btn" id="copyBtn">📋 လင့်ကိုကူးယူမည်</button>
         </div>
     </div>
 
@@ -120,57 +80,78 @@
         const result = document.getElementById('result');
         const latEl = document.getElementById('lat');
         const lonEl = document.getElementById('lon');
+        const altEl = document.getElementById('alt');
+        const accuracyInfo = document.getElementById('accuracyInfo');
         const mapLink = document.getElementById('mapLink');
         const copyBtn = document.getElementById('copyBtn');
-        let fullMapUrl = '';
+        let mapUrl = '';
 
         getLocBtn.addEventListener('click', () => {
             if (!navigator.geolocation) {
                 error.style.display = 'block';
-                error.textContent = '❌ သင့်ဘရောင်ဇာက တည်နေရာရှာဖွေခြင်းကို မထောက်ပံ့ပါ။';
+                error.textContent = '❌ သင့်ဘရောင်ဇာသည် တည်နေရာကို မထောက်ပံ့ပါ';
                 return;
             }
 
-            // UI ပြင်ဆင်ခြင်း
             loading.style.display = 'block';
             error.style.display = 'none';
             result.classList.remove('show');
             getLocBtn.disabled = true;
 
-            // တည်နေရာတောင်းခံခြင်း
             navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
+                (pos) => {
+                    loading.style.display = 'none';
                     
+                    const lat = pos.coords.latitude.toFixed(7);
+                    const lon = pos.coords.longitude.toFixed(7);
+                    const accuracy = Math.round(pos.coords.accuracy);
+                    const alt = pos.coords.altitude 
+                        ? `${pos.coords.altitude.toFixed(1)} မီတာ` 
+                        : 'မရရှိနိုင်';
+
                     latEl.textContent = lat;
                     lonEl.textContent = lon;
+                    altEl.textContent = alt;
                     
-                    // Google Maps လင့်ဖန်တီးခြင်း
-                    fullMapUrl = `https://www.google.com/maps?q=${lat},${lon}`;
-                    mapLink.href = fullMapUrl;
-                    
-                    loading.style.display = 'none';
+                    // တိကျမှုအချက်အလက်
+                    if (accuracy <= 20) {
+                        accuracyInfo.innerHTML = `<span class="good">✅ အတိအကျရှိသည် (~${accuracy} မီတာ)</span>`;
+                    } else if (accuracy <= 100) {
+                        accuracyInfo.innerHTML = `<span class="warn">⚠️ အတော်လေးကောင်းသည် (~${accuracy} မီတာ)</span>`;
+                    } else {
+                        accuracyInfo.innerHTML = `<span class="warn">⚠️ တိကျမှုအားနည်းသည် (~${accuracy} မီတာ)။ ပြင်ပသို့ထွက်ပြီး ထပ်ကြိုးစားကြည့်ပါ</span>`;
+                    }
+
+                    mapUrl = `https://www.google.com/maps?q=${lat},${lon}&z=18`;
+                    mapLink.href = mapUrl;
+
                     result.classList.add('show');
                     getLocBtn.disabled = false;
                 },
                 (err) => {
                     loading.style.display = 'none';
-                    error.style.display = 'block';
-                    error.textContent = '❌ တည်နေရာရှာမရပါ။ ခွင့်မပြုထားခြင်း သို့မဟုတ် အချက်ပြအားနည်းနေခြင်းကြောင့်ဖြစ်နိုင်ပါတယ်။';
                     getLocBtn.disabled = false;
+                    error.style.display = 'block';
+                    
+                    switch(err.code) {
+                        case 1: error.textContent = '❌ တည်နေရာခွင့်မပြုထားပါ။ ဘရောင်ဇာဆက်တင်းမှာ ခွင့်ပြုပါ'; break;
+                        case 2: error.textContent = '❌ တည်နေရာရှာမတွေ့ပါ။ GPS/အင်တာနက်စစ်ပါ'; break;
+                        case 3: error.textContent = '⏳ အချိန်ကုန်သွားပါပြီ။ ထပ်မံကြိုးစားကြည့်ပါ'; break;
+                        default: error.textContent = '❌ အမှားအယွင်းတစ်ခုဖြစ်ခဲ့သည်';
+                    }
                 },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                {
+                    enableHighAccuracy: true,  // 🔥 အတိအကျအတွက် အဓိကအချက်
+                    timeout: 20000,            // စောင့်ချိန်တိုးပေးထား
+                    maximumAge: 0              // နောက်ဆုံးရသတင်းကိုသာအသုံးပြု
+                }
             );
         });
 
-        // လင့်ကိုကူးယူခြင်း
         copyBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(fullMapUrl).then(() => {
-                copyBtn.textContent = '✅ လင့်ကိုကူးပြီးပါပြီ!';
-                setTimeout(() => {
-                    copyBtn.textContent = '📋 မြေပုံလင့်ကို ကူးယူမည်';
-                }, 2500);
+            navigator.clipboard.writeText(mapUrl).then(() => {
+                copyBtn.textContent = '✅ ကူးယူပြီးပါပြီ!';
+                setTimeout(() => copyBtn.textContent = '📋 လင့်ကိုကူးယူမည်', 2500);
             });
         });
     </script>
