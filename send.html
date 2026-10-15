@@ -3,44 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📍 တည်နေရာပို့ရန်</title>
+    <title>📍 တည်နေရာမျှဝေခြင်း | Premium</title>
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-database-compat.js"></script>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif;}
-        body{background:linear-gradient(135deg,#4facfe,#00f2fe);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-        .card{background:white;border-radius:20px;padding:25px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.15);}
-        h2{text-align:center;color:#1e40af;margin-bottom:20px;}
-        .loc-box{background:#e0f2fe;border-radius:10px;padding:15px;margin-bottom:15px;display:none;}
-        .loc-box.show{display:block;}
-        .row{display:flex;justify-content:space-between;padding:5px 0;font-size:14px;}
-        input{width:100%;padding:12px;font-size:16px;border:2px solid #e5e7eb;border-radius:8px;margin-bottom:12px;}
-        button{width:100%;padding:13px;font-size:16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;}
-        .btn-blue{background:#3b82f6;color:white;margin-bottom:10px;}
-        .btn-green{background:#16a34a;color:white;display:none;}
-        .status{margin-top:12px;padding:10px;border-radius:6px;display:none;font-size:14px;}
-        .ok{background:#d4edda;color:#155724;display:block;}
-        .err{background:#f8d7da;color:#721c24;display:block;}
-        .tip{margin-top:15px;text-align:center;font-size:13px;color:#64748b;line-height:1.5;}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+        body{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+        .card{background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-radius:28px;padding:36px 30px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.15);}
+        .logo{text-align:center;margin-bottom:8px;}
+        .logo span{font-size:48px;}
+        h2{text-align:center;color:#1a1a2e;font-size:24px;font-weight:700;margin-bottom:6px;}
+        .subtitle{text-align:center;color:#9ca3af;font-size:14px;margin-bottom:32px;}
+        
+        .loc-section{background:linear-gradient(135deg,#f0f4ff,#f8f9ff);border-radius:20px;padding:24px;margin-bottom:24px;border:1px solid rgba(102,126,234,0.1);}
+        .section-title{font-size:15px;font-weight:600;color:#1a1a2e;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+        .detect-btn{width:100%;padding:16px;font-size:16px;font-weight:600;border:none;border-radius:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;}
+        .detect-btn:active{transform:scale(0.98);}
+        .detect-btn:disabled{background:#e2e2e4;cursor:not-allowed;transform:none;}
+        .result-box{margin-top:16px;display:none;}
+        .result-box.show{display:block;}
+        .coord-item{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:white;border-radius:12px;margin-bottom:10px;}
+        .coord-label{font-size:14px;color:#71717a;font-weight:500;}
+        .coord-value{font-size:14px;color:#1a1a2e;font-weight:600;font-family:'SF Mono',monospace;}
+        .map-link{display:block;text-align:center;background:linear-gradient(135deg,#10b981,#059669);color:white;text-decoration:none;padding:12px;border-radius:12px;font-weight:600;font-size:14px;margin-top:12px;transition:opacity 0.2s;}
+        .map-link:active{opacity:0.9;}
+        
+        .input-field{width:100%;padding:16px 18px;font-size:16px;border:2px solid #e4e4e7;border-radius:14px;margin-bottom:14px;transition:border-color 0.2s;}
+        .input-field:focus{outline:none;border-color:#667eea;}
+        .input-field::placeholder{color:#a1a1aa;}
+        
+        .send-btn{width:100%;padding:16px;font-size:17px;font-weight:600;border:none;border-radius:14px;background:linear-gradient(135deg,#10b981,#059669);color:white;cursor:pointer;transition:transform 0.2s,opacity 0.2s;display:none;margin-top:6px;}
+        .send-btn:active{transform:scale(0.98);}
+        .send-btn:disabled{background:#d4d4d8;cursor:not-allowed;transform:none;}
+        .send-btn.show{display:block;}
+        
+        .status{margin-top:18px;padding:14px 16px;border-radius:12px;font-size:14px;display:none;}
+        .status.show{display:block;}
+        .status.success{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;}
+        .status.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;}
+        .footer-note{margin-top:24px;text-align:center;font-size:12px;color:#a1a1aa;line-height:1.6;}
+        .divider{height:1px;background:linear-gradient(to right,transparent,#e4e4e7,transparent);margin:24px 0;}
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>📍 တည်နေရာပို့ရန်</h2>
-        
-        <button id="detectBtn" class="btn-blue">🔍 ကျွန်ုပ်၏တည်နေရာကို ရှာပါ</button>
-        
-        <div id="locBox" class="loc-box">
-            <div class="row"><b>လတီကျူ့ဒ်:</b> <span id="lat">--</span></div>
-            <div class="row"><b>လောင်ဂျီကျူ့ဒ်:</b> <span id="lng">--</span></div>
+        <div class="logo"><span>📍</span></div>
+        <h2>တည်နေရာမျှဝေခြင်း</h2>
+        <p class="subtitle">သင့်တည်နေရာကို လုံခြုံစွာမျှဝေနိုင်ပါသည်</p>
+
+        <div class="loc-section">
+            <div class="section-title">👁️ ကျွန်ုပ်၏တည်နေရာ</div>
+            <button id="detectBtn" class="detect-btn">
+                <span id="detectText">🔍 တည်နေရာကို ရှာဖွေရန်</span>
+            </button>
+            
+            <div id="resultBox" class="result-box">
+                <div class="coord-item">
+                    <span class="coord-label">လတီကျူ့ဒ်</span>
+                    <span class="coord-value" id="latVal">--</span>
+                </div>
+                <div class="coord-item">
+                    <span class="coord-label">လောင်ဂျီကျူ့ဒ်</span>
+                    <span class="coord-value" id="lngVal">--</span>
+                </div>
+                <a id="mapLink" href="" target="_blank" class="map-link">🌍 မြေပုံပေါ်တွင် ကြည့်ရှုရန်</a>
+            </div>
         </div>
 
-        <input type="text" id="name" placeholder="သင့်နာမည်" style="display:none;">
-        <input type="password" id="pass" placeholder="စကားဝှက်သတ်မှတ်ပါ" style="display:none;">
-        <button id="sendBtn" class="btn-green">📡 တည်နေရာပို့ပါ</button>
+        <input type="text" id="nameInput" class="input-field" placeholder="သင့်အမည်" style="display:none;">
+        <input type="password" id="passInput" class="input-field" placeholder="ကြည့်ရှုခွင့် စကားဝှက်" style="display:none;">
+        <button id="sendBtn" class="send-btn">📤 တည်နေရာကို မျှဝေရန်</button>
+
+        <div id="statusBox" class="status"></div>
+
+        <div class="divider"></div>
         
-        <div id="status" class="status"></div>
-        <div class="tip">⏰ ပို့လိုက်တဲ့ဒေတာသည် ၁ နာရီအကြာတွင် အလိုအလျောက်ဖျက်ပါမည်<br>✅ ပို့ပြီးရင် တက်ဘ်ကို ကိုယ်တိုင်ပိတ်လိုက်ပါ</div>
+        <div class="footer-note">
+            ⏰ မျှဝေထားသောဒေတာသည် <strong>၁ နာရီအကြာတွင်</strong> အလိုအလျောက်ဖျက်ပါမည်<br>
+            ✅ ပို့ပြီးပါက တက်ဘ်ကို ပိတ်လိုက်ပါ
+        </div>
     </div>
 
     <script>
@@ -56,63 +97,94 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let lat, lng;
+        let currentLat, currentLng;
         const detectBtn = document.getElementById('detectBtn');
-        const locBox = document.getElementById('locBox');
-        const nameInput = document.getElementById('name');
-        const passInput = document.getElementById('pass');
+        const detectText = document.getElementById('detectText');
+        const resultBox = document.getElementById('resultBox');
+        const latVal = document.getElementById('latVal');
+        const lngVal = document.getElementById('lngVal');
+        const mapLink = document.getElementById('mapLink');
+        const nameInput = document.getElementById('nameInput');
+        const passInput = document.getElementById('passInput');
         const sendBtn = document.getElementById('sendBtn');
-        const status = document.getElementById('status');
+        const statusBox = document.getElementById('statusBox');
 
-        function hash(p) { let h=0; for(let i=0;i<p.length;i++)h=((h<<5)-h)+p.charCodeAt(i); return Math.abs(h).toString(16); }
-        function show(m,t){status.textContent=m;status.className='status '+(t==='ok'?'ok':'err');}
+        function hashPass(p) { let h=0; for(let i=0;i<p.length;i++)h=((h<<5)-h)+p.charCodeAt(i); return Math.abs(h).toString(16); }
+        function showStatus(msg, isSuccess){
+            statusBox.textContent = msg;
+            statusBox.className = 'status show ' + (isSuccess ? 'success' : 'error');
+        }
 
         detectBtn.addEventListener('click', () => {
-            detectBtn.textContent='ရှာနေသည်...';
-            if(!navigator.geolocation){show('❌ တည်နေရာမထောက်ပံ့ပါ','err');detectBtn.textContent='🔍 ရှာပါ';return;}
+            detectBtn.disabled = true;
+            detectText.textContent = '⏳ ရှာဖွေနေသည်...';
+            
+            if(!navigator.geolocation){
+                showStatus('❌ သင့်စက်တွင် တည်နေရာဝန်ဆောင်မှု မရရှိနိုင်ပါ', false);
+                detectBtn.disabled = false;
+                detectText.textContent = '🔍 တည်နေရာကို ရှာဖွေရန်';
+                return;
+            }
+
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
-                    lat = pos.coords.latitude;
-                    lng = pos.coords.longitude;
-                    document.getElementById('lat').textContent = lat.toFixed(6);
-                    document.getElementById('lng').textContent = lng.toFixed(6);
-                    locBox.classList.add('show');
-                    nameInput.style.display='block';
-                    passInput.style.display='block';
-                    sendBtn.style.display='block';
-                    detectBtn.style.display='none';
-                    show('✅ တည်နေရာတွေ့ပါသည်','ok');
+                    currentLat = pos.coords.latitude;
+                    currentLng = pos.coords.longitude;
+                    latVal.textContent = currentLat.toFixed(6);
+                    lngVal.textContent = currentLng.toFixed(6);
+                    mapLink.href = `https://google.com/maps?q=${currentLat},${currentLng}`;
+                    resultBox.classList.add('show');
+                    
+                    detectText.textContent = '✅ တည်နေရာတွေ့ရှိပြီး';
+                    detectBtn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
+                    
+                    setTimeout(()=>{
+                        nameInput.style.display = 'block';
+                        passInput.style.display = 'block';
+                        sendBtn.classList.add('show');
+                    }, 300);
+                    
+                    showStatus('✅ တည်နေရာမှန်ကန်စွာဖမ်းမိပါသည်', true);
                 },
-                (e) => {
-                    let m='❌ အမှား';
-                    if(e.code===1)m='❌ တည်နေရာခွင့်မပေးထားပါ';
-                    if(e.code===2)m='❌ နေရာရှာမတွေ့ပါ — အပြင်သို့သွားပါ';
-                    if(e.code===3)m='❌ အချိန်ကုန်သွားပါပြီ';
-                    show(m,'err');
-                    detectBtn.textContent='🔍 ရှာပါ';
+                (err) => {
+                    let msg = '❌ အမှားအယွင်းတစ်ခုဖြစ်သွားသည်';
+                    if(err.code === 1) msg = '❌ တည်နေရာခွင့်ပြုချက် မပေးထားပါ';
+                    if(err.code === 2) msg = '❌ တည်နေရာရှာမတွေ့ပါ — အပြင်သို့ထွက်ကြည့်ပါ';
+                    if(err.code === 3) msg = '❌ အချိန်ကုန်သွားပါပြီ — ထပ်မံကြိုးစားကြည့်ပါ';
+                    showStatus(msg, false);
+                    detectBtn.disabled = false;
+                    detectText.textContent = '🔍 တည်နေရာကို ရှာဖွေရန်';
                 },
-                {enableHighAccuracy:true,timeout:20000}
+                {enableHighAccuracy:true, timeout:20000}
             );
         });
 
         sendBtn.addEventListener('click', async () => {
-            const n = nameInput.value.trim();
-            const p = passInput.value.trim();
-            if(!n){show('❌ နာမည်ထည့်ပါ','err');return;}
-            if(!p){show('❌ စကားဝှက်ထည့်ပါ','err');return;}
-            sendBtn.textContent='ပို့နေသည်...';
+            const name = nameInput.value.trim();
+            const pass = passInput.value.trim();
+            
+            if(!name) { showStatus('❌ အမည်ဖြည့်သွင်းပါ', false); return; }
+            if(!pass) { showStatus('❌ စကားဝှက်သတ်မှတ်ပါ', false); return; }
+            
+            sendBtn.disabled = true;
+            sendBtn.textContent = '⏳ ပို့ဆောင်နေသည်...';
+            
             try{
-                await db.ref('users/'+n.replace(/[.#$/[\]]/g,'_')).set({
-                    name:n,
-                    passwordHash:hash(p),
-                    latitude:lat,
-                    longitude:lng,
+                const safeName = name.replace(/[.#$/[\]]/g, '_');
+                await db.ref('users/' + safeName).set({
+                    name: name,
+                    passwordHash: hashPass(p),
+                    latitude: currentLat,
+                    longitude: currentLng,
                     time: new Date().toLocaleString()
                 });
-                show('✅ ပို့ပြီးပါပြီ! ၁ နာရီအတွင်း ဖျက်ပါမည်','ok');
-                sendBtn.textContent='✅ ပို့ပြီးပြီ';
-                sendBtn.disabled=true;
-            }catch(e){show('❌ '+e.message,'err');sendBtn.textContent='📡 တည်နေရာပို့ပါ';}
+                showStatus('✅ အောင်မြင်စွာမျှဝေပြီးပါပြီ!', true);
+                sendBtn.textContent = '✅ ပို့ပြီးသွားပါပြီ';
+            }catch(err){
+                showStatus('❌ အမှား - ' + err.message, false);
+                sendBtn.disabled = false;
+                sendBtn.textContent = '📤 တည်နေရာကို မျှဝေရန်';
+            }
         });
     </script>
 </body>
