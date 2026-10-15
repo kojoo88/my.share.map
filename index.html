@@ -3,80 +3,115 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ကျွန်ုပ်နေရာ မျှဝေမယ်</title>
+  <title>ကျွန်ုပ်နေရာ မျှဝေရန်</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; font-family: sans-serif; }
-    #map { width: 100%; height: calc(100vh - 90px); }
+    html, body { height: 100%; font-family: Arial, sans-serif; }
+    #map { width: 100%; height: calc(100vh - 120px); }
+    .top-hint {
+      position: fixed; top: 0; left: 0; right: 0;
+      background: #e3f2fd; padding: 12px; text-align: center;
+      font-size: 15px; color: #0d47a1; z-index: 1000;
+      border-bottom: 1px solid #90caf9;
+    }
     .bottom-bar {
       position: fixed; bottom: 0; left: 0; right: 0;
-      background: white; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      background: #ffffff; padding: 15px; box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
       z-index: 1000;
     }
-    .share-btn {
-      width: 100%; padding: 14px; background: #25D366; color: white;
-      border: none; border-radius: 8px; font-size: 17px; font-weight: bold;
-      cursor: pointer;
+    .action-btn {
+      width: 100%; padding: 14px; font-size: 16px; font-weight: bold;
+      border: none; border-radius: 8px; cursor: pointer; transition: 0.2s;
     }
-    .status { text-align: center; margin-top: 10px; font-size: 14px; color: #555; }
+    .btn-inactive { background: #e0e0e0; color: #999; cursor: default; }
+    .btn-ready { background: #2196f3; color: white; }
+    .btn-copied { background: #4caf50; color: white; }
+    .link-box {
+      margin-top: 10px; padding: 10px; background: #f5f5f5;
+      border-radius: 4px; font-size: 12px; word-break: break-all; display: none;
+    }
   </style>
 </head>
 <body>
+  <div class="top-hint" id="topHint">👆 မြေပုံပေါ်မှာ သင့်နေရာကို တစ်ချက်နှိပ်ပါ</div>
   <div id="map"></div>
   <div class="bottom-bar">
-    <button class="share-btn" onclick="getMyLocation()">📍 ကျွန်ုပ်နေရာကို ရှာပါ</button>
-    <div class="status" id="status">အပေါ်က ခလုတ်ကို နှိပ်ပါ</div>
+    <button class="action-btn btn-inactive" id="actionBtn" disabled>ဦးစွာ နေရာကို နှိပ်ပါ</button>
+    <div class="link-box" id="linkBox"></div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    var map = L.map('map').setView([19.7406, 96.2195], 10);
-    var status = document.getElementById('status');
-    var myMarker;
+    // မြန်မာနိုင်ငံ အလယ်မှာ အစပြုမယ်
+    var map = L.map('map').setView([19.7406, 96.2195], 6);
+    var myMarker = null;
+    var shareUrl = '';
+    var actionBtn = document.getElementById('actionBtn');
+    var topHint = document.getElementById('topHint');
+    var linkBox = document.getElementById('linkBox');
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap'
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    function getMyLocation() {
-      status.innerHTML = "⏳ ရှာနေသည်... ခွင့်ပြုပါ ကိုနှိပ်ပါ";
-      
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          function(pos) {
-            var lat = pos.coords.latitude;
-            var lng = pos.coords.longitude;
-            
-            map.setView([lat, lng], 17);
-            
-            if (myMarker) map.removeLayer(myMarker);
-            myMarker = L.marker([lat, lng])
-              .addTo(map)
-              .bindPopup("✅ သင့်နေရာ<br>" + lat.toFixed(6) + ", " + lng.toFixed(6))
-              .openPopup();
-            
-            var shareLink = "https://www.google.com/maps/search/?api=1&query=" + lat + "," + lng;
-            
-            status.innerHTML = 
-              "✅ တွေ့ပြီ! <br>" +
-              "<button onclick='copyLink(\"" + shareLink + "\")' style='margin-top:8px;padding:8px 16px;background:#4285F4;color:white;border:none;border-radius:4px;cursor:pointer;'>📋 လင့်ခ်ကူးယူပြီး မျှဝေမယ်</button>";
-          },
-          function(err) {
-            status.innerHTML = "❌ အမှား- ခွင့်မပြုထားပါ။ ဖုန်းဆက်တင်မှာ တည်နေရာဖွင့်ပါ";
-          },
-          { enableHighAccuracy: true, timeout: 20000 }
-        );
+    // မြေပုံပေါ်ကို နှိပ်လိုက်တဲ့အခါ
+    map.on('click', function (e) {
+      if (myMarker) map.removeLayer(myMarker);
+
+      myMarker = L.marker(e.latlng)
+        .addTo(map)
+        .bindPopup(
+          '<strong>သင့်ရွေးချယ်ထားသောနေရာ</strong><br>' +
+          'လတ္တီကျု: ' + e.latlng.lat.toFixed(6) + '<br>' +
+          'လောင်ဂျီကျု: ' + e.latlng.lng.toFixed(6)
+        )
+        .openPopup();
+
+      shareUrl = 'https://www.google.com/maps/search/?api=1&query=' +
+        e.latlng.lat + ',' + e.latlng.lng;
+
+      topHint.innerHTML = '✅ နေရာရွေးချယ်ပြီးပါပြီ';
+      actionBtn.innerHTML = '📋 လင့်ခ်ကူးယူပါ';
+      actionBtn.className = 'action-btn btn-ready';
+      actionBtn.disabled = false;
+      linkBox.style.display = 'none';
+    });
+
+    // ကူးယူခလုတ် နှိပ်တဲ့အခါ
+    actionBtn.addEventListener('click', function () {
+      if (!shareUrl) return;
+
+      // ကူးယူကြိုးပမ်းမယ်
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(function () {
+          showCopied();
+        }).catch(function () {
+          showFallbackLink();
+        });
       } else {
-        status.innerHTML = "❌ သင့်ဖုန်းက မထောက်ပံ့ပါ";
+        showFallbackLink();
       }
+    });
+
+    function showCopied() {
+      actionBtn.innerHTML = '✅ ကူးယူပြီးပါပြီ';
+      actionBtn.className = 'action-btn btn-copied';
+      linkBox.style.display = 'block';
+      linkBox.innerHTML = '<strong>လင့်ခ်-</strong><br>' + shareUrl;
+
+      setTimeout(function () {
+        actionBtn.innerHTML = '📋 လင့်ခ်ကူးယူပါ';
+        actionBtn.className = 'action-btn btn-ready';
+      }, 2500);
     }
 
-    function copyLink(link) {
-      navigator.clipboard.writeText(link).then(() => {
-        alert("✅ လင့်ခ်ကူးယူပြီးပါပြီ!\nWhatsApp မှာ ကူးပို့လိုက်ရုံပါ!\n\n👉 " + link);
-      });
+    function showFallbackLink() {
+      alert('အောက်ကလင့်ခ်ကို ကူးယူပါ-\\n\\n' + shareUrl);
+      linkBox.style.display = 'block';
+      linkBox.innerHTML = '<strong>လင့်ခ်-</strong><br>' + shareUrl +
+        '<br><small>အပေါ်ကလင့်ခ်ကို ဖိထားပြီး ကူးယူပါ</small>';
     }
   </script>
 </body>
